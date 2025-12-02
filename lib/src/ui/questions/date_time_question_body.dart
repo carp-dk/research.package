@@ -32,7 +32,6 @@ class RPUIDateTimeQuestionBodyState extends State<RPUIDateTimeQuestionBody>
       height: 200,
       padding: const EdgeInsets.all(8),
       alignment: Alignment.topLeft,
-      // TODO: Rendering bug in Flutter - https://github.com/flutter/flutter/issues/50193
       child: CupertinoTheme(
         data: CupertinoThemeData(
           brightness: Theme.of(context).brightness,
@@ -41,6 +40,7 @@ class RPUIDateTimeQuestionBodyState extends State<RPUIDateTimeQuestionBody>
           mode: widget.mode,
           use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
           initialDateTime: DateTime.now(),
+          maximumDate: DateTime.now(),
           onDateTimeChanged: (DateTime dateTime) {
             widget.onResultChange(dateTime.toString());
           },

@@ -25,13 +25,21 @@ class RPUITimerStepState extends State<RPUITimerStep> {
   void initState() {
     super.initState();
     if (widget.step.playSound) {
-      player.setAsset(
-          '../packages/research_package/assets/audio/RPTimerStepSound.mp3');
-      _mPlayerIsInitialized = true;
+
+      player.setReleaseMode(ReleaseMode.stop);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await player.setSource(AssetSource('audio/RPTimerStepSound.mp3'));
+          _mPlayerIsInitialized = true;
+        } catch (e) {
+          print(e);
+        }
+      });
     }
     timeInSeconds = widget.step.timeout.inSeconds;
     const oneSec = Duration(seconds: 1);
-    timer = Timer.periodic(oneSec, (t) {
+    timer = Timer.periodic(oneSec, (t) async {
       if (mounted) {
         setState(() {
           timeInSeconds--;
@@ -39,7 +47,7 @@ class RPUITimerStepState extends State<RPUITimerStep> {
       }
       if (timeInSeconds <= 0) {
         if (_mPlayerIsInitialized) {
-          player.play();
+          await player.resume();
         }
         if (widget.step.autoSkip) {
           t.cancel();

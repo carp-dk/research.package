@@ -1,3 +1,38 @@
+## 2.2.0
+
+* Removing Research Package styles, integrating carp_themes_package instead.
+* Added support for new media types in RPInstructionStep class. Media types include
+  - Video 
+  - Audio
+  - Image
+Media can be accessed by providing a url in the protocol under an RPInstructionStep by setting it as "video_step": "url".
+* Changed color of BACK button in task to be same as NEXT button.
+
+
+## 2.1.1
+
+* minor visual updates
+
+## 2.1.0
+
+* updating RPColors theme to act as carp_styles_package temporarily
+
+## 2.0.2
+
+* fixing nullable variables
+
+## 2.0.1
+
+* fixing asset path
+
+## 2.0.0
+
+* Redesign of informed consent 
+* Redesign of app bar
+* Addition of research_package_styles
+* Major flutter upgrade for example app
+* Major gradle upgrade for exmaple app 
+
 ## 1.8.0
 
 * Added support for a `HealthDataCollection` type in the `RPConsentSectionType` which allow for showing what health data is being collected as part of an informed consent flow.

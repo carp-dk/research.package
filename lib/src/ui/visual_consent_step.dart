@@ -16,11 +16,13 @@ class RPUIVisualConsentStep extends StatefulWidget {
 class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
     with SingleTickerProviderStateMixin {
   int _pageNr = 0;
+  int _totalPages = 0;
   bool _lastPage = false;
 
   @override
   void initState() {
     super.initState();
+    _totalPages = widget.consentDocument.sections.length;
   }
 
   void _goToNextPage(int pageNr) {
@@ -54,23 +56,24 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
           actions: <Widget>[
             OutlinedButton(
               child: Text(
-                locale?.translate('YES') ?? "YES",
+                locale?.translate('NO') ?? "NO",
                 style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              onPressed: () => Navigator.of(context).pop(), // Pop the popup,
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Theme.of(context).extension<CarpColors>()!.primary),
+              child: Text(
+                RPLocalizations.of(context)?.translate('YES') ?? 'YES',
+                style: Theme.of(context).primaryTextTheme.labelLarge,
               ),
               onPressed: () {
                 Navigator.of(context).pop(); // Pop the popup
                 Navigator.of(context).pop(); // Pop the screen
               },
             ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor),
-                child: Text(
-                  RPLocalizations.of(context)?.translate('NO') ?? 'NO',
-                  style: Theme.of(context).primaryTextTheme.labelLarge,
-                ),
-                onPressed: () => Navigator.of(context).pop() // Pop the popup,
-                )
           ],
         );
       },
@@ -224,15 +227,18 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
         section.type == RPConsentSectionType.PassiveDataCollection ||
         section.type == RPConsentSectionType.HealthDataCollection) {
       return Container(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Text(
                 locale?.translate(section.title) ?? section.title,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: fs24fw700ls0.copyWith(
+                  color: Theme.of(context).extension<CarpColors>()!.primary,
+                ),
                 textAlign: TextAlign.start,
               ),
             ),
@@ -275,12 +281,18 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               children: <Widget>[
                 Text(
                   locale?.translate(section.title) ?? section.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: fs24fw700ls0.copyWith(
+                    color: Theme.of(context).extension<CarpColors>()!.primary,
+                  ),
                   textAlign: TextAlign.start,
                 ),
                 const SizedBox(height: 5),
-                Text(locale?.translate(section.summary) ?? section.summary,
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  locale?.translate(section.summary) ?? section.summary,
+                  style: fs16fw400ls0.copyWith(
+                    color: Theme.of(context).extension<CarpColors>()!.grey900,
+                  ),
+                ),
                 const SizedBox(height: 30),
                 GestureDetector(
                   onTap: () => _pushContent(
@@ -288,12 +300,12 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
                     section.content!,
                   ),
                   child: Text(
-                      RPLocalizations.of(context)?.translate('learn_more') ??
-                          "Learn more...",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(color: Theme.of(context).primaryColor)),
+                    RPLocalizations.of(context)?.translate('learn_more') ??
+                        "Learn more",
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        color:
+                            Theme.of(context).extension<CarpColors>()!.primary),
+                  ),
                 ),
               ],
             ),
@@ -301,6 +313,30 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
         ),
       );
     }
+  }
+
+  Widget _progressIndicator() {
+    if (_totalPages <= 1) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(_totalPages - 1, (index) {
+          return Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              height: 4, // Thickness of the indicator
+              decoration: BoxDecoration(
+                color: index < _pageNr
+                    ? Theme.of(context).extension<CarpColors>()!.primary
+                    : Theme.of(context).extension<CarpColors>()!.grey300,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
   }
 
   Widget _navigationButtons(PageController controller) {
@@ -319,8 +355,8 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
           ),
           TextButton(
             style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all(Theme.of(context).primaryColor),
+              backgroundColor: WidgetStateProperty.all(
+                  Theme.of(context).extension<CarpColors>()!.primary),
             ),
             onPressed: _lastPage
                 ? () => blocTask.sendStatus(RPStepStatus.Finished)
@@ -349,14 +385,16 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   Widget build(BuildContext context) {
     PageController controller = PageController();
 
-    return PopScope(
+    return PopScope<RPUIVisualConsentStep>(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor:
+            Theme.of(context).extension<CarpColors>()!.backgroundGray,
         body: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              _progressIndicator(),
               Expanded(
                 child: PageView.builder(
                   onPageChanged: (pageNr) {
@@ -390,14 +428,17 @@ class DataCollectionListItemState extends State<DataCollectionListItem> {
   Widget build(BuildContext context) {
     RPLocalizations? locale = RPLocalizations.of(context);
     return ExpansionTile(
+      tilePadding: const EdgeInsets.only(left: 0),
       expandedAlignment: Alignment.centerLeft,
       title: Text(
         locale?.translate(widget.dataTypeSection.dataName) ??
             widget.dataTypeSection.dataName,
-        style: Theme.of(context).textTheme.titleMedium,
+        style: fs20fw700ls0.copyWith(
+          color: Theme.of(context).extension<CarpColors>()!.grey900,
+        ),
         textAlign: TextAlign.start,
       ),
-      childrenPadding: const EdgeInsets.only(left: 15, right: 15, bottom: 5),
+      childrenPadding: const EdgeInsets.only(bottom: 5),
       children: [
         Text(
           locale?.translate(widget.dataTypeSection.dataInformation) ??

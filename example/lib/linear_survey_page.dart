@@ -29,6 +29,14 @@ class LinearSurveyPage extends StatelessWidget {
       task: linearSurveyTask,
       onSubmit: resultCallback,
       onCancel: cancelCallBack,
+      carouselBarImage: Image.asset(
+        'assets/icons/carp_logo_example.png',
+        package: 'research_package',
+        fit: BoxFit.contain,
+        height: 16,
+      ),
+      carouselBarBackgroundColor:
+          Theme.of(context).extension<CarpColors>()!.backgroundGray,
       // onCancel: (RPTaskResult? result) {
       //   if (result == null) {
       //     print("No result");

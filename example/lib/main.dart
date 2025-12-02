@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:research_package/research_package.dart';
 import 'package:carp_serializable/carp_serializable.dart';
+import 'package:carp_themes_package/carp_themes_package.dart';
 
 part 'informed_consent_page.dart';
 part 'linear_survey_page.dart';
@@ -79,9 +80,8 @@ class RPDemoApp extends StatelessWidget {
         // from the list (English, in this case).
         return supportedLocales.first;
       },
-      theme: ThemeData.light(),
-      // the default dark theme looks very strange.... so disabled for now
-      // darkTheme: ThemeData.dark(),
+      theme: carpTheme,
+      darkTheme: carpDarkTheme,
       title: 'Research Package Demo',
       home: const HomePage(),
       debugShowCheckedModeBanner: false,

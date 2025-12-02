@@ -239,16 +239,16 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
                 widget.step.reasonForConsent!),
             actions: <Widget>[
               OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   locale?.translate('CANCEL') ?? 'CANCEL',
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
                 style: ButtonStyle(
-                  backgroundColor:
-                      WidgetStateProperty.all(Theme.of(context).primaryColor),
+                  backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).extension<CarpColors>()!.primary),
                 ),
                 onPressed: onPressedCallback,
                 child: Text(locale?.translate('AGREE') ?? "AGREE",
@@ -261,7 +261,8 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor:
+          Theme.of(context).extension<CarpColors>()!.backgroundGray,
       body: SafeArea(
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -442,61 +443,66 @@ class _SignatureRouteState extends State<_SignatureRoute> {
   @override
   Widget build(BuildContext context) {
     RPLocalizations? locale = RPLocalizations.of(context);
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(12),
-          physics: const NeverScrollableScrollPhysics(),
-          children: <Widget>[
-            widget._consentSignature.requiresName
-                ? _nameFields(context)
-                : Container(),
-            widget._consentSignature.requiresSignatureImage
-                ? _signingField(context)
-                : Container(),
-          ],
-        ),
-      ),
-      persistentFooterButtons: <Widget>[
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor),
-          onPressed: (_isNameFilled && _isSignatureAdded)
-              ? () {
-                  if (widget._consentSignature.requiresSignatureImage) {
-                    _signatureController?.toPngBytes().then(
-                      (image) {
-                        widget._onFinished(
-                          RPSignatureResult.withParams(
-                            _firstNameController.value.text,
-                            _lastNameController.value.text,
-                            // Converting the Uint8List into a string to make it compatible with JSON serialization
-                            image.toString(),
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    widget._onFinished(
-                      RPSignatureResult.withParams(
-                        _firstNameController.value.text,
-                        _lastNameController.value.text,
-                        // Since no signature was asked set the image blob to null
-                        null,
-                      ),
-                    );
-                  }
-                  blocTask.sendStatus(RPStepStatus.Finished);
-                }
-              : null,
-          child: Text(
-            locale?.translate('NEXT') ?? "NEXT",
-            style: Theme.of(context).primaryTextTheme.labelLarge,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onPanDown: (_) => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor:
+            Theme.of(context).extension<CarpColors>()!.backgroundGray,
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(12),
+            physics: const NeverScrollableScrollPhysics(),
+            children: <Widget>[
+              widget._consentSignature.requiresName
+                  ? _nameFields(context)
+                  : Container(),
+              widget._consentSignature.requiresSignatureImage
+                  ? _signingField(context)
+                  : Container(),
+            ],
           ),
         ),
-        //),
-      ],
+        persistentFooterButtons: <Widget>[
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor),
+            onPressed: (_isNameFilled && _isSignatureAdded)
+                ? () {
+                    if (widget._consentSignature.requiresSignatureImage) {
+                      _signatureController?.toPngBytes().then(
+                        (image) {
+                          widget._onFinished(
+                            RPSignatureResult.withParams(
+                              _firstNameController.value.text,
+                              _lastNameController.value.text,
+                              // Converting the Uint8List into a string to make it compatible with JSON serialization
+                              image.toString(),
+                            ),
+                          );
+                        },
+                      );
+                    } else {
+                      widget._onFinished(
+                        RPSignatureResult.withParams(
+                          _firstNameController.value.text,
+                          _lastNameController.value.text,
+                          // Since no signature was asked set the image blob to null
+                          null,
+                        ),
+                      );
+                    }
+                    blocTask.sendStatus(RPStepStatus.Finished);
+                  }
+                : null,
+            child: Text(
+              locale?.translate('NEXT') ?? "NEXT",
+              style: Theme.of(context).primaryTextTheme.labelLarge,
+            ),
+          ),
+          //),
+        ],
+      ),
     );
   }
 
