@@ -8,7 +8,9 @@ Update dependencies:
  - `json_annotation: ^4.12.0`
  - `audioplayers: ^6.7.0`
  - `video_player: ^2.11.1`
- * Updated example apps
+
+* Updated example apps
+* Improve typechecking for bottom bar visibility
 
 ## 2.3.0
 
