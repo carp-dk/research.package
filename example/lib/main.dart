@@ -31,12 +31,7 @@ class RPDemoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      supportedLocales: const [
-        Locale('en'),
-        Locale('da'),
-        Locale('fr'),
-        Locale('es'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('da'), Locale('fr'), Locale('es')],
       localizationsDelegates: [
         // Research Package translations - supports translation of both the
         // RP-specific text as well as app-specific text.
@@ -107,96 +102,62 @@ class HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Padding(padding: const EdgeInsets.all(10.0), child: Image.asset("assets/images/carp_logo.png", height: 80)),
             Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Image.asset(
-                "assets/images/carp_logo.png",
-                height: 80,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    locale?.translate("home.welcome") ?? "Welcome",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  Container(height: 5),
+                  Text(
+                    locale?.translate("home.questions") ?? "Questions?",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  Container(height: 5),
+                  const Text(
+                    "support@carp.dk",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.white, decoration: TextDecoration.underline),
+                  ),
+                  //Container(height: 50),
+                ],
               ),
             ),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      locale?.translate("home.welcome") ?? "Welcome",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    Container(height: 5),
-                    Text(
-                      locale?.translate("home.questions") ?? "Questions?",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    Container(height: 5),
-                    const Text(
-                      "support@carp.dk",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          decoration: TextDecoration.underline),
-                    ),
-                    //Container(height: 50),
-                  ],
-                )),
-            Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Column(
-                  children: <Widget>[
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffC32C39),
-                        fixedSize: const Size(300, 60),
-                      ),
-                      child: Text(
-                        locale?.translate("informed_consent") ??
-                            "Informed Consent",
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute<dynamic>(
-                            builder: (context) => InformedConsentPage()));
-                      },
-                    ),
-                    Container(height: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffC32C39),
-                        fixedSize: const Size(300, 60),
-                      ),
-                      child: Text(
-                        locale?.translate("linear_survey") ?? "Linear Survey",
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute<dynamic>(
-                            builder: (context) => LinearSurveyPage()));
-                      },
-                    ),
-                    Container(height: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffC32C39),
-                        fixedSize: const Size(300, 60),
-                      ),
-                      child: Text(
-                        locale?.translate("branching_survey") ??
-                            "Branching Survey",
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute<dynamic>(
-                            builder: (context) => NavigableSurveyPage()));
-                      },
-                    ),
-                  ],
-                )),
+              padding: const EdgeInsets.only(top: 20),
+              child: Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
+                    child: Text(locale?.translate("informed_consent") ?? "Informed Consent", style: const TextStyle(color: Colors.white, fontSize: 18)),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => InformedConsentPage()));
+                    },
+                  ),
+                  Container(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
+                    child: Text(locale?.translate("linear_survey") ?? "Linear Survey", style: const TextStyle(color: Colors.white, fontSize: 18)),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => LinearSurveyPage()));
+                    },
+                  ),
+                  Container(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
+                    child: Text(locale?.translate("branching_survey") ?? "Branching Survey", style: const TextStyle(color: Colors.white, fontSize: 18)),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => NavigableSurveyPage()));
+                    },
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
