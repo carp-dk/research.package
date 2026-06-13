@@ -1,4 +1,4 @@
-## 2.3.0
+## 2.4.0
 
 Update dependencies:
  - `sdk: ^3.12.2`
