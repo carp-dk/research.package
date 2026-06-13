@@ -10,6 +10,10 @@ Update dependencies:
  - `video_player: ^2.11.1`
  * Updated example apps
 
+## 2.3.0
+
+* Adding custom padding to carouselBar
+
 ## 2.2.0
 
 * Removing Research Package styles, integrating carp_themes_package instead.

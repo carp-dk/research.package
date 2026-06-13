@@ -12,6 +12,9 @@ class RPUITask extends StatefulWidget {
 
   final Image? carouselBarImage;
 
+  final double? carouselBarHorizontalPadding;
+  final double? carouselBarVerticalPadding;
+
   final Color? carouselBarBackgroundColor;
 
   /// The callback function which has to return an [RPTaskResult] object.
@@ -35,6 +38,8 @@ class RPUITask extends StatefulWidget {
     super.key,
     required this.task,
     this.carouselBarImage,
+    this.carouselBarHorizontalPadding,
+    this.carouselBarVerticalPadding,
     this.carouselBarBackgroundColor,
     this.onSubmit,
     this.onCancel,
@@ -248,6 +253,10 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
 
   Widget _carouselBar(RPLocalizations? locale) {
     return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.carouselBarHorizontalPadding ?? 0,
+        vertical: widget.carouselBarVerticalPadding ?? 0,
+      ),
       color: widget.carouselBarBackgroundColor ??
           Theme.of(context).extension<CarpColors>()!.backgroundGray,
       child: SizedBox(
