@@ -3,14 +3,14 @@ description: A demo application for Research Package
 publish_to: none
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ^3.12.2
   flutter: ">=3.16.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  
-  cupertino_icons: ^1.0.4
+
+  cupertino_icons: ^1.0.8
   flutter_localizations:
     sdk: flutter
 
@@ -20,8 +20,12 @@ dependencies:
   #   path: ../../carp/carp.sensing-flutter/carp_serializable/
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

@@ -1,3 +1,17 @@
+## 2.4.0
+
+Update dependencies:
+ - `sdk: ^3.12.2`
+ - `carp_themes_package: ^0.0.5`
+ - `carp_serializable: ^2.0.1`
+ - `signature: ^6.3.0`
+ - `json_annotation: ^4.12.0`
+ - `audioplayers: ^6.7.0`
+ - `video_player: ^2.11.1`
+
+* Updated example apps
+* Improve typechecking for bottom bar visibility
+
 ## 2.3.0
 
 * Adding custom padding to carouselBar
