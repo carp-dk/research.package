@@ -282,7 +282,10 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                       '${_currentStepIndex + 1} '
                       '${locale?.translate('of') ?? 'of'} '
                       '${widget.task.steps.length}',
-                      style: Theme.of(context).appBarTheme.titleTextStyle,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(fontSize: 18),
                       textAlign: TextAlign.center,
                     )
                   : Container(),

@@ -210,7 +210,7 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
                   widget.step.consentDocument.sections[index].summary) ??
               widget.step.consentDocument.sections[index].summary,
           style: Theme.of(context).textTheme.bodyLarge,
-          textAlign: TextAlign.start,
+          textAlign: TextAlign.justify,
         ),
         widget.step.consentDocument.sections[index].content != null
             ? Text(
@@ -218,7 +218,7 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
                         widget.step.consentDocument.sections[index].content!) ??
                     widget.step.consentDocument.sections[index].content!,
                 style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.start,
+                textAlign: TextAlign.justify,
               )
             : Container(),
       ],
@@ -245,14 +245,9 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 ),
               ),
-              TextButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                      Theme.of(context).colorScheme.primary),
-                ),
+              FilledButton(
                 onPressed: onPressedCallback,
-                child: Text(locale?.translate('AGREE') ?? "AGREE",
-                    style: Theme.of(context).textTheme.labelLarge),
+                child: Text(locale?.translate('AGREE') ?? "AGREE"),
               ),
             ],
           );
@@ -280,15 +275,8 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
             blocTask.sendStatus(RPStepStatus.Canceled);
           },
         ),
-        TextButton(
-          style: ButtonStyle(
-            backgroundColor:
-                WidgetStateProperty.all(Theme.of(context).primaryColor),
-          ),
-          child: Text(
-            locale?.translate('AGREE') ?? "AGREE",
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
+        FilledButton(
+          child: Text(locale?.translate('AGREE') ?? "AGREE"),
           onPressed: () {
             showConsentDialog(
               widget.step.consentDocument.signatures.isNotEmpty
@@ -465,8 +453,6 @@ class _SignatureRouteState extends State<_SignatureRoute> {
         ),
         persistentFooterButtons: <Widget>[
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor),
             onPressed: (_isNameFilled && _isSignatureAdded)
                 ? () {
                     if (widget._consentSignature.requiresSignatureImage) {
@@ -495,10 +481,7 @@ class _SignatureRouteState extends State<_SignatureRoute> {
                     blocTask.sendStatus(RPStepStatus.Finished);
                   }
                 : null,
-            child: Text(
-              locale?.translate('NEXT') ?? "NEXT",
-              style: Theme.of(context).primaryTextTheme.labelLarge,
-            ),
+            child: Text(locale?.translate('NEXT') ?? "NEXT"),
           ),
           //),
         ],

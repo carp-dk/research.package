@@ -62,13 +62,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               onPressed: () => Navigator.of(context).pop(), // Pop the popup,
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primary),
-              child: Text(
-                RPLocalizations.of(context)?.translate('YES') ?? 'YES',
-                style: Theme.of(context).primaryTextTheme.labelLarge,
-              ),
+              child: Text(RPLocalizations.of(context)?.translate('YES') ?? 'YES'),
               onPressed: () {
                 Navigator.of(context).pop(); // Pop the popup
                 Navigator.of(context).pop(); // Pop the screen
@@ -353,28 +347,16 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
             ),
             onPressed: () => _showCancelDialog(),
           ),
-          TextButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                  Theme.of(context).colorScheme.primary),
-            ),
+          FilledButton(
             onPressed: _lastPage
                 ? () => blocTask.sendStatus(RPStepStatus.Finished)
                 : () => controller.nextPage(
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.fastOutSlowIn),
             child: _lastPage
-                ? Text(
-                    RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
-                        "SEE SUMMARY",
-                    style: const TextStyle(color: Colors.white),
-                  )
-                : Text(
-                    RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                  ),
+                ? Text(RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
+                    "SEE SUMMARY")
+                : Text(RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT"),
           ),
         ],
       ),
@@ -429,6 +411,8 @@ class DataCollectionListItemState extends State<DataCollectionListItem> {
     RPLocalizations? locale = RPLocalizations.of(context);
     return ExpansionTile(
       tilePadding: const EdgeInsets.only(left: 0),
+      shape: const Border(),
+      collapsedShape: const Border(),
       expandedAlignment: Alignment.centerLeft,
       title: Text(
         locale?.translate(widget.dataTypeSection.dataName) ??
