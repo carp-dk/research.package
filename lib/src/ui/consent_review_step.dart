@@ -248,7 +248,7 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
               TextButton(
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(
-                      Theme.of(context).extension<CarpColors>()!.primary),
+                      Theme.of(context).colorScheme.primary),
                 ),
                 onPressed: onPressedCallback,
                 child: Text(locale?.translate('AGREE') ?? "AGREE",
@@ -262,7 +262,7 @@ class __TextPresenterRouteState extends State<_TextPresenterRoute> {
 
     return Scaffold(
       backgroundColor:
-          Theme.of(context).extension<CarpColors>()!.backgroundGray,
+          Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -448,7 +448,7 @@ class _SignatureRouteState extends State<_SignatureRoute> {
       onPanDown: (_) => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor:
-            Theme.of(context).extension<CarpColors>()!.backgroundGray,
+            Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(12),

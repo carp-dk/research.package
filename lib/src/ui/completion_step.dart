@@ -35,7 +35,7 @@ class RPUICompletionStepState extends State<RPUICompletionStep>
     RPLocalizations? locale = RPLocalizations.of(context);
     return Scaffold(
       backgroundColor:
-          Theme.of(context).extension<CarpColors>()!.backgroundGray,
+          Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -69,7 +69,7 @@ class RPUICompletionStepState extends State<RPUICompletionStep>
               ),
             ),
             ButtonTheme(
-              buttonColor: Theme.of(context).extension<CarpColors>()!.primary,
+              buttonColor: Theme.of(context).colorScheme.primary,
               minWidth: 150,
               child: OutlinedButton(
                 onPressed: () {

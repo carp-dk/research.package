@@ -258,7 +258,7 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
         vertical: widget.carouselBarVerticalPadding ?? 0,
       ),
       color: widget.carouselBarBackgroundColor ??
-          Theme.of(context).extension<CarpColors>()!.backgroundGray,
+          Theme.of(context).scaffoldBackgroundColor,
       child: SizedBox(
         height: AppBar().preferredSize.height,
         child: Row(
@@ -321,7 +321,7 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
       // },
       child: Scaffold(
         backgroundColor:
-            Theme.of(context).extension<CarpColors>()!.backgroundGray,
+            Theme.of(context).scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: Column(
@@ -374,9 +374,7 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                           if (snapshot.hasData) {
                             return ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .extension<CarpColors>()!
-                                      .primary),
+                                  backgroundColor: Theme.of(context).colorScheme.primary),
                               onPressed: snapshot.data!
                                   ? () {
                                       FocusManager.instance.primaryFocus

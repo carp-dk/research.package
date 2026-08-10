@@ -76,7 +76,6 @@ class RPDemoApp extends StatelessWidget {
         return supportedLocales.first;
       },
       theme: carpTheme,
-      darkTheme: carpDarkTheme,
       title: 'Research Package Demo',
       home: const HomePage(),
       debugShowCheckedModeBanner: false,

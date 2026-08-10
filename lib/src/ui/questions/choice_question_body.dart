@@ -69,7 +69,6 @@ class RPUIChoiceQuestionBodyState extends State<RPUIChoiceQuestionBody>
           : false,
       currentChoices: selectedChoices,
       index: index,
-      isLastChoice: index == widget.answerFormat.choices.length - 1,
       answerStyle: widget.answerFormat.answerStyle,
     );
   }
@@ -88,10 +87,17 @@ class RPUIChoiceQuestionBodyState extends State<RPUIChoiceQuestionBody>
                     RPChoiceAnswerStyle.MultipleChoice)
                 ? "(${locale?.translate('choose_one_or_more_options') ?? 'Choose one or more options'})"
                 : "(${locale?.translate('choose_one_option') ?? 'Choose one option'})")),
-        ListView.builder(
+        ListView.separated(
           shrinkWrap: true,
           itemCount: widget.answerFormat.choices.length,
           itemBuilder: _choiceCellBuilder,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
+            color: Colors.grey.shade300,
+          ),
           physics: const NeverScrollableScrollPhysics(),
         ),
       ],
@@ -107,7 +113,6 @@ class _ChoiceButton extends StatefulWidget {
   final Function selectedCallBack;
   final List<RPChoice> currentChoices;
   final bool selected;
-  final bool isLastChoice;
   final int index;
   final RPChoiceAnswerStyle answerStyle;
 
@@ -117,8 +122,7 @@ class _ChoiceButton extends StatefulWidget {
       required this.currentChoices,
       required this.index,
       required this.answerStyle,
-      required this.selected,
-      required this.isLastChoice});
+      required this.selected});
 
   @override
   _ChoiceButtonState createState() => _ChoiceButtonState();
@@ -168,14 +172,6 @@ class _ChoiceButtonState extends State<_ChoiceButton> {
               padding: widget.choice.isFreeText
                   ? null
                   : const EdgeInsets.only(bottom: 13),
-              decoration: !widget.isLastChoice
-                  ? BoxDecoration(
-                      border: Border(
-                        bottom:
-                            BorderSide(color: Theme.of(context).dividerColor),
-                      ),
-                    )
-                  : null,
               child: widget.choice.isFreeText
                   ? TextField(
                       onChanged: (newText) => widget.choice.text = newText,
