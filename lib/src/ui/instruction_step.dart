@@ -64,7 +64,7 @@ class RPUIInstructionStepState extends State<RPUIInstructionStep> {
     RPLocalizations? locale = RPLocalizations.of(context);
     return Scaffold(
       backgroundColor:
-          Theme.of(context).extension<CarpColors>()!.backgroundGray,
+          Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: <Widget>[

@@ -62,13 +62,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               onPressed: () => Navigator.of(context).pop(), // Pop the popup,
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Theme.of(context).extension<CarpColors>()!.primary),
-              child: Text(
-                RPLocalizations.of(context)?.translate('YES') ?? 'YES',
-                style: Theme.of(context).primaryTextTheme.labelLarge,
-              ),
+              child: Text(RPLocalizations.of(context)?.translate('YES') ?? 'YES'),
               onPressed: () {
                 Navigator.of(context).pop(); // Pop the popup
                 Navigator.of(context).pop(); // Pop the screen
@@ -236,8 +230,8 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Text(
                 locale?.translate(section.title) ?? section.title,
-                style: fs24fw700ls0.copyWith(
-                  color: Theme.of(context).extension<CarpColors>()!.primary,
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 textAlign: TextAlign.start,
               ),
@@ -281,16 +275,16 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               children: <Widget>[
                 Text(
                   locale?.translate(section.title) ?? section.title,
-                  style: fs24fw700ls0.copyWith(
-                    color: Theme.of(context).extension<CarpColors>()!.primary,
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   textAlign: TextAlign.start,
                 ),
                 const SizedBox(height: 5),
                 Text(
                   locale?.translate(section.summary) ?? section.summary,
-                  style: fs16fw400ls0.copyWith(
-                    color: Theme.of(context).extension<CarpColors>()!.grey900,
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Colors.grey.shade900,
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -304,7 +298,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
                         "Learn more",
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         color:
-                            Theme.of(context).extension<CarpColors>()!.primary),
+                            Theme.of(context).colorScheme.primary),
                   ),
                 ),
               ],
@@ -328,8 +322,8 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               height: 4, // Thickness of the indicator
               decoration: BoxDecoration(
                 color: index < _pageNr
-                    ? Theme.of(context).extension<CarpColors>()!.primary
-                    : Theme.of(context).extension<CarpColors>()!.grey300,
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -353,28 +347,16 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
             ),
             onPressed: () => _showCancelDialog(),
           ),
-          TextButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                  Theme.of(context).extension<CarpColors>()!.primary),
-            ),
+          FilledButton(
             onPressed: _lastPage
                 ? () => blocTask.sendStatus(RPStepStatus.Finished)
                 : () => controller.nextPage(
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.fastOutSlowIn),
             child: _lastPage
-                ? Text(
-                    RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
-                        "SEE SUMMARY",
-                    style: const TextStyle(color: Colors.white),
-                  )
-                : Text(
-                    RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                  ),
+                ? Text(RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
+                    "SEE SUMMARY")
+                : Text(RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT"),
           ),
         ],
       ),
@@ -389,7 +371,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
       canPop: false,
       child: Scaffold(
         backgroundColor:
-            Theme.of(context).extension<CarpColors>()!.backgroundGray,
+            Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -429,12 +411,14 @@ class DataCollectionListItemState extends State<DataCollectionListItem> {
     RPLocalizations? locale = RPLocalizations.of(context);
     return ExpansionTile(
       tilePadding: const EdgeInsets.only(left: 0),
+      shape: const Border(),
+      collapsedShape: const Border(),
       expandedAlignment: Alignment.centerLeft,
       title: Text(
         locale?.translate(widget.dataTypeSection.dataName) ??
             widget.dataTypeSection.dataName,
-        style: fs20fw700ls0.copyWith(
-          color: Theme.of(context).extension<CarpColors>()!.grey900,
+        style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 20).copyWith(
+          color: Colors.grey.shade900,
         ),
         textAlign: TextAlign.start,
       ),

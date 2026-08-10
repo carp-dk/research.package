@@ -1,3 +1,11 @@
+## 2.4.1
+
+* Migrated to `carp_themes_package` 0.2.0: widgets now read colors and text
+  styles from the standard `ThemeData` (`ColorScheme`, `TextTheme`,
+  `scaffoldBackgroundColor`) instead of the removed `CarpColors` extension and
+  `fsXX` text constants.
+* Lowered the minimum Dart SDK to `3.12.0`.
+
 ## 2.4.0
 
 Update dependencies:
