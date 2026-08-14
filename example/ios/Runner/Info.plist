@@ -26,6 +26,15 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Usage descriptions for the permissions declared on the consent sections
+	     in lib/research_package_objects/informed_consent.dart. iOS terminates the
+	     app if a permission is requested without one. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to study how you move around during the study.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The microphone is used to measure the background noise around you.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Motion data is used to recognize your physical activity during the study.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

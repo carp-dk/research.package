@@ -6,8 +6,8 @@ part of '../../ui.dart';
 /// Instead, add an visual consent step to a task and present the task using a task widget.
 /// When appropriate, the task widget instantiates the visual consent step widget for the step.
 class RPUIVisualConsentStep extends StatefulWidget {
-  const RPUIVisualConsentStep({super.key, required this.consentDocument});
-  final RPConsentDocument consentDocument;
+  const RPUIVisualConsentStep({super.key, required this.step});
+  final RPVisualConsentStep step;
 
   @override
   RPUIVisualConsentStepState createState() => RPUIVisualConsentStepState();
@@ -19,28 +19,96 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   int _totalPages = 0;
   bool _lastPage = false;
 
+  final PageController _controller = PageController();
+
+  /// Collects the outcome of the permissions asked for while going through the
+  /// sections. `null` unless [RPVisualConsentStep.askPermission] is set.
+  RPPermissionResult? _permissionResult;
+
+  /// Guards against asking again while the dialog for the previous request is
+  /// still up.
+  bool _requestingPermissions = false;
+
   @override
   void initState() {
     super.initState();
-    _totalPages = widget.consentDocument.sections.length;
+    _totalPages = widget.step.consentDocument.sections.length;
+    if (widget.step.askPermission) {
+      _permissionResult = RPPermissionResult(identifier: widget.step.identifier)
+        ..startDate = DateTime.now();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _goToNextPage(int pageNr) {
     setState(() {
       _pageNr = pageNr;
-      if (_pageNr == widget.consentDocument.sections.length - 1) {
+      if (_pageNr == widget.step.consentDocument.sections.length - 1) {
         _lastPage = true;
       }
     });
   }
 
+  /// Asks for the permissions declared on the section currently on screen.
+  ///
+  /// The requests are made one at a time, because iOS shows a single permission
+  /// dialog at a time and asking for several at once is unreliable. A permission
+  /// which was already granted is skipped, so going back and forth - or through
+  /// the consent flow a second time - does not prompt again.
+  Future<void> _requestPermissionsForCurrentSection() async {
+    final result = _permissionResult;
+    if (result == null || _requestingPermissions) return;
+
+    final permissions =
+        widget.step.consentDocument.sections[_pageNr].permissions;
+    if (permissions == null || permissions.isEmpty) return;
+
+    _requestingPermissions = true;
+    try {
+      for (var permission in permissions) {
+        if (result.statuses[permission] == RPPermissionStatus.granted) continue;
+        result.setStatus(permission, await RPPermissions.request(permission));
+      }
+    } finally {
+      _requestingPermissions = false;
+    }
+  }
+
+  /// Adds the outcome of the permission requests to the task result, under the
+  /// identifier of this step. Does nothing if nothing was asked for.
+  void _sendPermissionResult() {
+    final result = _permissionResult;
+    if (result == null || result.statuses.isEmpty) return;
+    result.endDate = DateTime.now();
+    blocTask.sendStepResult(result);
+  }
+
+  /// Moves on from the section currently on screen, asking for its permissions
+  /// first so the dialog is shown while its explanation is still visible.
+  Future<void> _proceed() async {
+    await _requestPermissionsForCurrentSection();
+    if (!mounted) return;
+
+    if (_lastPage) {
+      _sendPermissionResult();
+      blocTask.sendStatus(RPStepStatus.Finished);
+    } else {
+      await _controller.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
+  }
+
   void _pushContent(String title, String content) {
     Navigator.of(context).push(
       MaterialPageRoute<dynamic>(
-        builder: (context) => _DetailTextRoute(
-          title: title,
-          content: content,
-        ),
+        builder: (context) => _DetailTextRoute(title: title, content: content),
       ),
     );
   }
@@ -51,8 +119,10 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
       builder: (context) {
         RPLocalizations? locale = RPLocalizations.of(context);
         return AlertDialog(
-          content: Text(locale?.translate('quit_confirmation') ??
-              "Are you sure you want to quit?"),
+          content: Text(
+            locale?.translate('quit_confirmation') ??
+                "Are you sure you want to quit?",
+          ),
           actions: <Widget>[
             OutlinedButton(
               child: Text(
@@ -62,7 +132,9 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               onPressed: () => Navigator.of(context).pop(), // Pop the popup,
             ),
             ElevatedButton(
-              child: Text(RPLocalizations.of(context)?.translate('YES') ?? 'YES'),
+              child: Text(
+                RPLocalizations.of(context)?.translate('YES') ?? 'YES',
+              ),
               onPressed: () {
                 Navigator.of(context).pop(); // Pop the popup
                 Navigator.of(context).pop(); // Pop the screen
@@ -213,7 +285,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   }
 
   Widget _consentSectionPageBuilder(BuildContext context, int index) {
-    RPConsentSection section = widget.consentDocument.sections[index];
+    RPConsentSection section = widget.step.consentDocument.sections[index];
     RPLocalizations? locale = RPLocalizations.of(context);
 
     // Display the list builder if type is of these types otherwise show normal.
@@ -283,22 +355,19 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
                 const SizedBox(height: 5),
                 Text(
                   locale?.translate(section.summary) ?? section.summary,
-                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Colors.grey.shade900,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.copyWith(color: Colors.grey.shade900),
                 ),
                 const SizedBox(height: 30),
                 GestureDetector(
-                  onTap: () => _pushContent(
-                    section.title,
-                    section.content!,
-                  ),
+                  onTap: () => _pushContent(section.title, section.content!),
                   child: Text(
                     RPLocalizations.of(context)?.translate('learn_more') ??
                         "Learn more",
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.primary),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ),
               ],
@@ -333,10 +402,14 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
     );
   }
 
-  Widget _navigationButtons(PageController controller) {
+  Widget _navigationButtons() {
     return Container(
-      padding:
-          const EdgeInsets.only(bottom: 15.0, top: 10.0, left: 30, right: 30),
+      padding: const EdgeInsets.only(
+        bottom: 15.0,
+        top: 10.0,
+        left: 30,
+        right: 30,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -348,15 +421,15 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
             onPressed: () => _showCancelDialog(),
           ),
           FilledButton(
-            onPressed: _lastPage
-                ? () => blocTask.sendStatus(RPStepStatus.Finished)
-                : () => controller.nextPage(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.fastOutSlowIn),
+            onPressed: _proceed,
             child: _lastPage
-                ? Text(RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
-                    "SEE SUMMARY")
-                : Text(RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT"),
+                ? Text(
+                    RPLocalizations.of(context)?.translate('SEE_SUMMARY') ??
+                        "SEE SUMMARY",
+                  )
+                : Text(
+                    RPLocalizations.of(context)?.translate('NEXT') ?? "NEXT",
+                  ),
           ),
         ],
       ),
@@ -365,13 +438,10 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
 
   @override
   Widget build(BuildContext context) {
-    PageController controller = PageController();
-
     return PopScope<RPUIVisualConsentStep>(
       canPop: false,
       child: Scaffold(
-        backgroundColor:
-            Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -383,12 +453,12 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
                     _goToNextPage(pageNr);
                   },
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: widget.consentDocument.sections.length,
-                  controller: controller,
+                  itemCount: widget.step.consentDocument.sections.length,
+                  controller: _controller,
                   itemBuilder: _consentSectionPageBuilder,
                 ),
               ),
-              _navigationButtons(controller),
+              _navigationButtons(),
             ],
           ),
         ),
@@ -417,9 +487,9 @@ class DataCollectionListItemState extends State<DataCollectionListItem> {
       title: Text(
         locale?.translate(widget.dataTypeSection.dataName) ??
             widget.dataTypeSection.dataName,
-        style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 20).copyWith(
-          color: Colors.grey.shade900,
-        ),
+        style: Theme.of(context).textTheme.titleLarge!
+            .copyWith(fontSize: 20)
+            .copyWith(color: Colors.grey.shade900),
         textAlign: TextAlign.start,
       ),
       childrenPadding: const EdgeInsets.only(bottom: 5),

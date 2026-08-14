@@ -36,6 +36,9 @@ part 'src/model/consent/visual_consent_step.dart';
 part 'src/model/consent/consent_review_step.dart';
 part 'src/model/consent/data_type_section.dart';
 
+part 'src/model/permission/permission_type.dart';
+part 'src/model/permission/permission_result.dart';
+
 part 'src/model/step/step.dart';
 part 'src/model/step/form_step.dart';
 part 'src/model/step/question_step.dart';

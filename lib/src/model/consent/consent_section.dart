@@ -29,6 +29,17 @@ class RPConsentSection extends Serializable {
   /// type UserDataCollection or PassiveDataCollection.
   List<RPDataTypeSection>? dataTypes;
 
+  /// The OS permissions which this section explains the need for.
+  ///
+  /// They are requested when the participant taps "NEXT" on this section during
+  /// a [RPVisualConsentStep] which has [RPVisualConsentStep.askPermission] set
+  /// to `true`. This way the permission dialog is shown in context, with the
+  /// [summary] and [content] of this section as the rationale — which is what
+  /// both Apple and Google ask for.
+  ///
+  /// If `null` or empty, no permissions are requested for this section.
+  List<RPPermissionType>? permissions;
+
   /// A custom illustration (an [Image] or [Icon] to show for Custom [RPConsentSectionType]
   @JsonKey(includeFromJson: false, includeToJson: false)
   Widget? customIllustration;
@@ -44,6 +55,7 @@ class RPConsentSection extends Serializable {
       required this.summary,
       this.content,
       this.dataTypes,
+      this.permissions,
       this.customIllustration}) {
     assert(type != RPConsentSectionType.Custom || title != null,
         "If a you are creating a Custom ConsentSection, then a title must be provided.");

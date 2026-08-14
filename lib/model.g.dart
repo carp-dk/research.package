@@ -294,6 +294,9 @@ RPConsentSection _$RPConsentSectionFromJson(Map<String, dynamic> json) =>
       dataTypes: (json['dataTypes'] as List<dynamic>?)
           ?.map((e) => RPDataTypeSection.fromJson(e as Map<String, dynamic>))
           .toList(),
+      permissions: (json['permissions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$RPPermissionTypeEnumMap, e))
+          .toList(),
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPConsentSectionToJson(RPConsentSection instance) =>
@@ -304,6 +307,9 @@ Map<String, dynamic> _$RPConsentSectionToJson(RPConsentSection instance) =>
       'summary': instance.summary,
       'content': ?instance.content,
       'dataTypes': ?instance.dataTypes?.map((e) => e.toJson()).toList(),
+      'permissions': ?instance.permissions
+          ?.map((e) => _$RPPermissionTypeEnumMap[e]!)
+          .toList(),
     };
 
 const _$RPConsentSectionTypeEnumMap = {
@@ -330,6 +336,18 @@ const _$RPConsentSectionTypeEnumMap = {
   RPConsentSectionType.Custom: 'Custom',
 };
 
+const _$RPPermissionTypeEnumMap = {
+  RPPermissionType.location: 'location',
+  RPPermissionType.locationAlways: 'locationAlways',
+  RPPermissionType.microphone: 'microphone',
+  RPPermissionType.camera: 'camera',
+  RPPermissionType.notification: 'notification',
+  RPPermissionType.activityRecognition: 'activityRecognition',
+  RPPermissionType.sensors: 'sensors',
+  RPPermissionType.bluetooth: 'bluetooth',
+  RPPermissionType.health: 'health',
+};
+
 RPConsentSignature _$RPConsentSignatureFromJson(Map<String, dynamic> json) =>
     RPConsentSignature(
       identifier: json['identifier'] as String,
@@ -353,6 +371,7 @@ RPVisualConsentStep _$RPVisualConsentStepFromJson(Map<String, dynamic> json) =>
         consentDocument: RPConsentDocument.fromJson(
           json['consentDocument'] as Map<String, dynamic>,
         ),
+        askPermission: json['askPermission'] as bool? ?? false,
       )
       ..$type = json['__type'] as String?
       ..title = json['title'] as String
@@ -372,6 +391,7 @@ Map<String, dynamic> _$RPVisualConsentStepToJson(
   'footnote': ?instance.footnote,
   'nextButtonText': ?instance.nextButtonText,
   'consentDocument': instance.consentDocument.toJson(),
+  'askPermission': instance.askPermission,
 };
 
 RPConsentReviewStep _$RPConsentReviewStepFromJson(Map<String, dynamic> json) =>
@@ -415,6 +435,47 @@ Map<String, dynamic> _$RPDataTypeSectionToJson(RPDataTypeSection instance) =>
       'dataName': instance.dataName,
       'dataInformation': instance.dataInformation,
     };
+
+RPPermissionResult _$RPPermissionResultFromJson(Map<String, dynamic> json) =>
+    RPPermissionResult(
+        identifier: json['identifier'] as String,
+        statuses: (json['statuses'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(
+            $enumDecode(_$RPPermissionTypeEnumMap, k),
+            $enumDecode(_$RPPermissionStatusEnumMap, e),
+          ),
+        ),
+      )
+      ..$type = json['__type'] as String?
+      ..startDate = json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String)
+      ..endDate = json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String);
+
+Map<String, dynamic> _$RPPermissionResultToJson(RPPermissionResult instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'identifier': instance.identifier,
+      'startDate': ?instance.startDate?.toIso8601String(),
+      'endDate': ?instance.endDate?.toIso8601String(),
+      'statuses': instance.statuses.map(
+        (k, e) => MapEntry(
+          _$RPPermissionTypeEnumMap[k]!,
+          _$RPPermissionStatusEnumMap[e]!,
+        ),
+      ),
+    };
+
+const _$RPPermissionStatusEnumMap = {
+  RPPermissionStatus.granted: 'granted',
+  RPPermissionStatus.denied: 'denied',
+  RPPermissionStatus.permanentlyDenied: 'permanentlyDenied',
+  RPPermissionStatus.restricted: 'restricted',
+  RPPermissionStatus.unsupported: 'unsupported',
+  RPPermissionStatus.unknown: 'unknown',
+};
 
 RPStep _$RPStepFromJson(Map<String, dynamic> json) => RPStep(
   identifier: json['identifier'] as String,
@@ -517,18 +578,17 @@ Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
 
 RPInstructionStep _$RPInstructionStepFromJson(Map<String, dynamic> json) =>
     RPInstructionStep(
-        identifier: json['identifier'] as String,
-        title: json['title'] as String,
-        text: json['text'] as String?,
-        optional: json['optional'] as bool? ?? false,
-        detailText: json['detailText'] as String?,
-        imagePath: json['imagePath'] as String?,
-        audioPath: json['audioPath'] as String?,
-        videoPath: json['videoPath'] as String?,
-        footnote: json['footnote'] as String?,
-      )
-      ..$type = json['__type'] as String?
-      ..nextButtonText = json['nextButtonText'] as String?;
+      identifier: json['identifier'] as String,
+      title: json['title'] as String,
+      text: json['text'] as String?,
+      optional: json['optional'] as bool? ?? false,
+      detailText: json['detailText'] as String?,
+      imagePath: json['imagePath'] as String?,
+      audioPath: json['audioPath'] as String?,
+      videoPath: json['videoPath'] as String?,
+      footnote: json['footnote'] as String?,
+      nextButtonText: json['nextButtonText'] as String?,
+    )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPInstructionStepToJson(RPInstructionStep instance) =>
     <String, dynamic>{

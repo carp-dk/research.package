@@ -86,6 +86,83 @@ exception is `_zero`, which is used for a `count` of exactly 0 in any language w
 category which is not translated falls back to `_other`, and a key with no plural variants at all
 falls back to the key itself.
 
+## OS permissions
+
+A consent section can declare the OS permissions its text explains the need for. When the visual
+consent step opts in with `askPermission: true`, tapping "NEXT" on that section triggers the native
+permission dialog — so the participant is asked in context, while the explanation is on screen,
+which is what both Apple and Google ask for.
+
+```dart
+RPConsentSection(
+  type: RPConsentSectionType.Location,
+  summary: 'We use your location to study how you move around.',
+  content: 'The longer explanation shown under "Learn more"...',
+  permissions: [RPPermissionType.location],
+);
+
+RPVisualConsentStep(
+  identifier: 'visualStep',
+  consentDocument: consentDocument,
+  askPermission: true, // off by default - nothing is requested without this
+);
+```
+
+The outcome of every request is collected in an `RPPermissionResult` added to the `RPTaskResult`
+under the identifier of the visual consent step. A denied permission is recorded but never blocks the
+participant.
+
+`RPPermissionType.health` is not covered by the underlying `permission_handler` plugin, so the app
+has to supply the request — for instance with the [health](https://pub.dev/packages/health) package:
+
+```dart
+RPPermissions.healthHandler = () async =>
+    await Health().requestAuthorization(types)
+        ? RPPermissionStatus.granted
+        : RPPermissionStatus.denied;
+```
+
+### Platform setup
+
+Only needed by apps which use `askPermission`.
+
+**Android** — declare each permission in `android/app/src/main/AndroidManifest.xml`. An undeclared
+permission is reported as permanently denied without showing a dialog.
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+```
+
+**iOS** — add a usage description per permission to `ios/Runner/Info.plist`; iOS terminates the app
+if one is missing. For example `NSLocationWhenInUseUsageDescription`,
+`NSMicrophoneUsageDescription` and `NSMotionUsageDescription` (which also covers
+`RPPermissionType.activityRecognition`, since iOS reads activity through CoreMotion).
+
+If the app integrates plugins with **CocoaPods**, each permission additionally has to be enabled in
+`ios/Podfile` — `permission_handler` compiles every permission out of the build unless its macro is
+set:
+
+```ruby
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_LOCATION_WHENINUSE=1', # use PERMISSION_LOCATION=1 for locationAlways
+        'PERMISSION_MICROPHONE=1',
+        'PERMISSION_SENSORS=1',            # activityRecognition and sensors
+      ]
+    end
+  end
+end
+```
+
+With **Swift Package Manager** this step is not needed — the macros are derived from the
+`Info.plist` keys above.
+
 ## Example Application
 
 There is an [example app](https://github.com/cph-cachet/research.package/tree/master/example) which demonstrates the different features of Research Package as implemented in a Flutter app.

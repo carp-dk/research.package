@@ -22,6 +22,32 @@
   `Future<Map<String, String>>` are still valid overrides and need no change.
   `MapLocalizationLoader` accordingly takes `Map<String, Map<String, dynamic>>`.
 * New dependency: `intl: '>=0.19.0 <0.21.0'`, for the CLDR plural rules.
+* Added support for requesting OS permissions in context during informed consent
+  (issue #171). A consent section now declares the permissions its text explains
+  the need for via `RPConsentSection.permissions`, and tapping "NEXT" on that
+  section triggers the native permission dialog — but only when the step opts in
+  with `RPVisualConsentStep.askPermission: true`. Without that flag nothing is
+  requested and the flow behaves exactly as before.
+* Added `RPPermissionType` (location, locationAlways, microphone, camera,
+  notification, activityRecognition, sensors, bluetooth, health) and
+  `RPPermissionStatus`.
+* Added `RPPermissionResult`, added to the task result under the identifier of
+  the `RPVisualConsentStep`, holding the status of every permission which was
+  asked for. A denied permission is recorded but never blocks the participant.
+* Added `RPPermissions.request()` for asking for a single permission outside a
+  consent flow, and `RPPermissions.healthHandler` — health data is not covered by
+  `permission_handler`, so `RPPermissionType.health` needs the app to supply the
+  request (e.g. through the `health` package). Without a handler it resolves to
+  `RPPermissionStatus.unsupported`.
+* New dependency: `permission_handler: '>=12.0.0 <13.0.0'`. Apps which use
+  `askPermission` must declare the permissions they ask for natively — see the
+  "OS permissions" section of the README. Apps which do not use it need no setup.
+* **Breaking:** `RPUIVisualConsentStep` now takes the `RPVisualConsentStep` as
+  `step:` instead of taking `consentDocument:`. This only affects code which
+  instantiates the widget directly, which is not normally needed — the step
+  builds it.
+* `RPUIVisualConsentStepState` now keeps its `PageController` in the state and
+  disposes it, instead of creating a new one on every build.
 * Added `RPUITask.carouselBarBuilder` for replacing the default carousel bar
   (logo, "x of y" progress and close button) with a custom widget. Return
   `const SizedBox.shrink()` to hide the bar entirely. When the builder is

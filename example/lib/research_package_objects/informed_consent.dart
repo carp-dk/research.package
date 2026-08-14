@@ -78,15 +78,22 @@ RPOrderedTask get consentTask {
       summary: "This is a summary for Data Handling.",
       content: "Data Handling dolor sit amet");
 
+  // The permissions this section explains the need for are asked for when
+  // tapping NEXT on it, because the visual consent step below has
+  // `askPermission: true`.
   RPConsentSection locationSection = RPConsentSection(
       type: RPConsentSectionType.Location,
       summary: "This is a summary for Location.",
-      content: "Location dolor sit amet");
+      content: "Location dolor sit amet",
+      permissions: [RPPermissionType.location]);
 
+  // Health data needs a `RPPermissions.healthHandler`, which this example does
+  // not register - so this resolves to RPPermissionStatus.unsupported.
   RPConsentSection healthSection = RPConsentSection(
       type: RPConsentSectionType.Health,
       summary: "This is a summary for Health.",
-      content: "Health dolor sit amet");
+      content: "Health dolor sit amet",
+      permissions: [RPPermissionType.health]);
 
   final healthDataCollectionSection = RPConsentSection(
     type: RPConsentSectionType.HealthDataCollection,
@@ -153,6 +160,10 @@ RPOrderedTask get consentTask {
             dataName: "Noise",
             dataInformation:
                 "Background noise as detected by the phone's microphone"),
+      ],
+      permissions: [
+        RPPermissionType.activityRecognition,
+        RPPermissionType.microphone,
       ]);
 
   RPConsentSection customSection = RPConsentSection(
@@ -213,7 +224,12 @@ RPOrderedTask get consentTask {
   );
 
   RPVisualConsentStep consentVisualStep = RPVisualConsentStep(
-      identifier: "visualStep", consentDocument: consentDocumentAllSections);
+      identifier: "visualStep",
+      consentDocument: consentDocumentAllSections,
+      // Ask for the permissions declared on the sections above while going
+      // through them. Remove this (or set it to false) and no permission is
+      // ever requested.
+      askPermission: true);
 
   RPInstructionStep instructionStep = RPInstructionStep(
     identifier: "instructionID",
