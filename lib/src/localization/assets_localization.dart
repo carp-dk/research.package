@@ -154,8 +154,7 @@ class AssetLocalizations {
     String resolvedKey = (count == null) ? key : _pluralKeyFor(key, count);
     String translation = translations[resolvedKey] ?? translations[key] ?? key;
 
-    // Keep the plain lookup allocation-free - with nothing to fill in, there is
-    // nothing for the interpolation to do.
+    // Nothing to fill in - keep the plain lookup allocation-free.
     if (args == null && count == null) return translation;
 
     return _interpolate(translation, {
@@ -177,8 +176,7 @@ class AssetLocalizations {
   /// Returns the translated key suffixed with the plural category, or [key]
   /// itself if there is no `_other` form to fall back on.
   String _pluralKeyFor(String key, num count) {
-    // Only offer the categories which are actually translated, so that
-    // [Intl.pluralLogic] can fall back to '_other' for the rest.
+    // Only the translated categories, so the rest fall back to '_other'.
     Map<String, String?> forms = {
       for (var category in _pluralCategories)
         category: translations.containsKey('${key}_$category')
@@ -193,8 +191,7 @@ class AssetLocalizations {
       two: forms['two'],
       few: forms['few'],
       many: forms['many'],
-      // [Intl.pluralLogic] requires a value here. Falling back to the key means
-      // an untranslated plural degrades to a plain lookup of [key].
+      // Required by [Intl.pluralLogic]; the key degrades to a plain lookup.
       other: forms['other'] ?? key,
       locale: locale.languageCode,
     );

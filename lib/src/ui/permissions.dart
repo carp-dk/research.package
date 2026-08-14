@@ -32,8 +32,8 @@ class RPPermissions {
     }
 
     try {
-      // Background location can only be asked for once the foreground
-      // permission is granted - on both platforms.
+      // Background location requires the foreground one first, on both
+      // platforms.
       if (type == RPPermissionType.locationAlways) {
         final foreground = _statusOf(
           await ph.Permission.locationWhenInUse.request(),
@@ -71,8 +71,7 @@ class RPPermissions {
 
     try {
       final health = Health();
-      // Null on iOS for read access, which is undetermined rather than denied,
-      // so anything but a definite `true` falls through to the request.
+      // Null on iOS - undetermined, not denied.
       if (await health.hasPermissions(types) ?? false) {
         return RPPermissionStatus.granted;
       }
@@ -103,8 +102,7 @@ class RPPermissions {
       case RPPermissionType.notification:
         return ph.Permission.notification;
       case RPPermissionType.activityRecognition:
-        // Android 10+ has a dedicated permission; on iOS the activity of the
-        // participant is read through CoreMotion.
+        // iOS has no such permission - the data comes from CoreMotion.
         return Platform.isIOS
             ? ph.Permission.sensors
             : ph.Permission.activityRecognition;
@@ -123,9 +121,7 @@ class RPPermissions {
   static RPPermissionStatus _statusOf(ph.PermissionStatus status) {
     switch (status) {
       case ph.PermissionStatus.granted:
-      // The participant granted access, but to a subset of what was asked for
-      // (e.g. some photos, or provisional notifications). Access was given, so
-      // it counts as granted.
+      // Partial access - some photos, provisional notifications - still counts.
       case ph.PermissionStatus.limited:
       case ph.PermissionStatus.provisional:
         return RPPermissionStatus.granted;

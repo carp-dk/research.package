@@ -27,8 +27,7 @@ void main() {
     });
 
     test('nested and dot-separated files are interchangeable', () {
-      // Existing translation files use dot-separated keys and downstream apps
-      // have hundreds of them, so both spellings have to resolve identically.
+      // Existing files use dot-separated keys, so both spellings must resolve.
       final nested = localizations('en', {
         'pages': {
           'task_list': {'title': 'Tasks'},
@@ -71,8 +70,7 @@ void main() {
     });
 
     test('a placeholder with no matching arg is left in place', () {
-      // Left visible on purpose: a forgotten argument should be obvious rather
-      // than silently rendering an empty gap.
+      // Left visible on purpose - better than a silently empty gap.
       final locale = localizations('en', {'greeting': 'Hello {{name}}'});
 
       expect(
@@ -83,8 +81,8 @@ void main() {
     });
 
     test('args interpolate into an untranslated literal', () {
-      // RP passes text which may be a key or a literal sentence, so the
-      // fallback has to be interpolated too.
+      // RP passes text which may be a key or a literal, so the fallback is
+      // interpolated too.
       final locale = localizations('en', {});
 
       expect(locale.translate('Hi {{name}}', args: {'name': 'Bo'}), 'Hi Bo');
@@ -172,8 +170,8 @@ void main() {
         }).translate('tasks', count: 1),
         '1 opgave',
       );
-      // Polish uses 'few' for 2-4 and 'many' for 5+. Selecting on English rules
-      // would wrongly give 'other' for both.
+      // Polish uses 'few' for 2-4 and 'many' for 5+; English rules would give
+      // 'other' for both.
       final polish = localizations('pl', {
         'tasks_one': '{{count}} zadanie',
         'tasks_few': '{{count}} zadania',

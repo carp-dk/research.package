@@ -158,8 +158,7 @@ class AssetLocalizationLoader implements LocalizationLoader {
     print("$runtimeType - loading '$path'");
     String jsonString = await rootBundle.loadString(path);
 
-    // Returned as decoded, so nested translations survive to be flattened when
-    // merged.
+    // Decoded as-is, so nested translations survive to be flattened on merge.
     return json.decode(jsonString) as Map<String, dynamic>;
   }
 }

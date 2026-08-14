@@ -85,13 +85,63 @@
 * Added `RPStep.nextButtonText` so an individual step can label its own forward
   action (e.g. "Start Practicing"). It takes precedence over
   `RPUITask.nextButtonText`, which in turn falls back to the `'NEXT'` key.
+
+## 2.5.0
+
+* Localization now supports nested translation keys (flattened to dot-separated
+  paths), `{{placeholder}}` interpolation via the new `args` argument of
+  `translate()`, and plurals via its new `count` argument, using the `_zero`,
+  `_one`, `_two`, `_few`, `_many` and `_other` key suffixes with the CLDR rules
+  of the locale. `translate('key')` behaves exactly as before.
+* `LocalizationLoader.load` now returns `Future<Map<String, dynamic>>` so a
+  loader may return nested translations. Loaders returning
+  `Future<Map<String, String>>` need no change.
+* Added support for requesting OS permissions in context during informed consent
+  (issue #171). A consent section declares what its text explains the need for
+  via `RPConsentSection.permissions`, and leaving that section prompts for them —
+  but only when the step opts in with `RPVisualConsentStep.askPermission: true`.
+  New: `RPPermissionType`, `RPPermissionStatus`, `RPPermissionResult` (added to
+  the task result under the identifier of the step) and `RPPermissions.request()`
+  for asking outside a consent flow. A denied permission is recorded but never
+  blocks the participant.
+* Health data is asked for through the `health` package rather than
+  `permission_handler`, since HealthKit and Health Connect authorise each data
+  type separately: a section listing `RPPermissionType.health` must also list the
+  types in the new `RPConsentSection.healthDataTypes`, or it resolves to
+  `unsupported`. `HealthDataType` is re-exported and
+  `RPPermissions.requestHealthData()` is public. On iOS the status is optimistic —
+  HealthKit does not disclose read access, so `granted` means the sheet was shown
+  without error.
+* Added a "BACK" button to `RPUIVisualConsentStep`, hidden on the first section
+  and on one which is still going to open a permission alert.
+* Added `RPUITask.carouselBarBuilder` and `RPUITask.bottomNavigationBuilder` for
+  replacing the carousel bar and the BACK/NEXT row with custom widgets; return
+  `const SizedBox.shrink()` to hide either entirely. The bottom builder is handed
+  an `RPTaskNavigation` — `onNext` (null while the step is not ready), `onBack`
+  (null on the first step, and offered in linear tasks, where the default row has
+  no BACK button), `onCancel` (confirms first), plus `canProceed`, `currentStep`,
+  `stepIndex` and `stepCount` — and is called on every step, including the ones
+  the default row hides itself on.
+* Added `RPUITask.nextButtonText`, `RPStep.nextButtonText` (which wins over it)
+  and `RPUITask.nextButtonStyle` for labelling and styling the Next button.
 * The bottom navigation row now centres the Next button when there is no Back
   button, instead of pushing it to the trailing edge.
-* Added `RPUITask.nextButtonStyle` to style the Next button. Properties set
-  there win; anything left null falls back to the previous default
-  (`CarpColors.primary` background) and then to the ambient
-  `ElevatedButtonThemeData`. The label stays white unless a `foregroundColor`
-  is given.
+* **Breaking:** an informed consent flow — an `RPOrderedTask` containing an
+  `RPConsentReviewStep` — no longer shows the close button in the top bar, nor a
+  "CANCEL" button on the visual consent step. Apple requires that a screen
+  explaining an upcoming permission request offers no way out other than the
+  system alert it leads to. Such a task is now left with "DISAGREE" on the review
+  step, which — unlike the old "CANCEL" — does call `RPUITask.onCancel`. Tasks
+  which are not consent tasks keep their close button.
+* **Breaking:** `RPUIVisualConsentStep` now takes the `RPVisualConsentStep` as
+  `step:` instead of `consentDocument:`. This only affects code instantiating the
+  widget directly.
+* New dependencies: `health: '>=13.0.0 <14.0.0'`, which **raises the Android
+  requirement to `minSdkVersion 26` for every app using research_package**;
+  `permission_handler: '>=12.0.0 <13.0.0'`; and `intl: '>=0.19.0 <0.21.0'`. Apps
+  which ask for permissions must declare them natively, and health data also
+  needs `FlutterFragmentActivity` and the Health Connect manifest entries — see
+  the platform setup in the README.
 
 ## 2.5.0
 

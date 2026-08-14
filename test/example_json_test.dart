@@ -63,11 +63,9 @@ void main() {
       RPOrderedTask survey = RPOrderedTask.fromJson(
           json.decode(surveyJson) as Map<String, dynamic>);
 
-      // Asserted against the file rather than against [linearSurveyTask]: the
-      // example app comments steps in and out of its demo survey, which would
-      // otherwise break this test. The file is also the richer artifact - it
-      // still covers deserializing timer, form and question steps, which the
-      // trimmed down example no longer does.
+      // Asserted against the file, not [linearSurveyTask]: the example app
+      // comments steps in and out of its demo survey. The file is also the
+      // richer artifact, still covering timer, form and question steps.
       expect(survey.identifier, 'surveyTaskID');
       expect(survey.steps.length, 9);
       expect(survey.steps.first.identifier, 'instructionID');

@@ -70,8 +70,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   void _onPageChanged(int pageNr) {
     setState(() {
       _pageNr = pageNr;
-      // Recomputed rather than latched, so that going back from the last
-      // section turns "SEE SUMMARY" into "NEXT" again.
+      // Recomputed, so going back turns "SEE SUMMARY" into "NEXT" again.
       _lastPage = _pageNr == widget.step.consentDocument.sections.length - 1;
     });
   }
@@ -401,10 +400,8 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   }
 
   Widget _navigationButtons() {
-    // No Back on the first section, and none on a section which is still about
-    // to open a system permission alert - that screen offers the forward button
-    // and nothing else. The slot is kept even when empty so the forward button
-    // does not move between sections.
+    // A section still about to open a permission alert offers the forward
+    // button and nothing else. The empty slot is kept so it does not move.
     final showBackButton = _pageNr > 0 && !_awaitsPermissionAlert;
 
     return Container(

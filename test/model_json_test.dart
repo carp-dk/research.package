@@ -137,9 +137,8 @@ void main() {
     });
 
     test('RPConsentSection with health data types survives a round trip', () {
-      // The health types are serialized through an enum map generated from the
-      // health package's 100+ HealthDataType values, so a regeneration which
-      // misses them would silently drop what a study is allowed to read.
+      // Serialized through a generated enum map of the health package's 100+
+      // types, so a regeneration missing them would silently drop them.
       final section = RPConsentSection(
         type: RPConsentSectionType.Health,
         summary: 'Why we read your health data',
@@ -188,9 +187,8 @@ void main() {
     });
   });
 
-  // CARP delivers study configurations as JSON. If the permission fields do not
-  // survive a round trip, a deployed study silently stops asking the participant
-  // for permissions without any error - hence these tests.
+  // CARP delivers study configurations as JSON. A permission field which does
+  // not survive a round trip stops a deployed study from asking, silently.
   group('Permissions', () {
     test('RPConsentSection with permissions -> JSON -> RPConsentSection', () {
       RPConsentSection section = RPConsentSection(

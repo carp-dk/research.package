@@ -12,9 +12,8 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
-// Only the data type enum - the rest of the health API is used in ui.dart.
-// Imported with `show` so that the ~100 other names it exports stay out of the
-// namespace shared by every part file of this library.
+// `show`n, to keep the ~100 other names it exports out of the namespace shared
+// by every part file of this library.
 import 'package:health/health.dart' show HealthDataType;
 import 'package:research_package/ui.dart';
 

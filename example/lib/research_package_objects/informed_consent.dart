@@ -78,18 +78,16 @@ RPOrderedTask get consentTask {
       summary: "This is a summary for Data Handling.",
       content: "Data Handling dolor sit amet");
 
-  // The permissions this section explains the need for are asked for when
-  // tapping NEXT on it, because the visual consent step below has
-  // `askPermission: true`.
+  // Asked for when tapping NEXT on this section, because the visual consent
+  // step below has `askPermission: true`.
   RPConsentSection locationSection = RPConsentSection(
       type: RPConsentSectionType.Location,
       summary: "This is a summary for Location.",
       content: "Location dolor sit amet",
       permissions: [RPPermissionType.location]);
 
-  // Health is not one permission - HealthKit and Health Connect authorise each
-  // data type separately - so the section names the types it needs. Listing
-  // RPPermissionType.health without them would leave nothing to ask for.
+  // Health authorises each data type separately, so the section names the ones
+  // it needs - listing RPPermissionType.health alone asks for nothing.
   RPConsentSection healthSection = RPConsentSection(
       type: RPConsentSectionType.Health,
       summary: "This is a summary for Health.",

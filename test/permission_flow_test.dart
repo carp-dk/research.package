@@ -7,32 +7,29 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:research_package/research_package.dart';
 
-/// Drives the visual consent step to verify that the permissions declared on a
-/// section are asked for when leaving that section, and only when the step opted
-/// in with `askPermission`.
+/// Verifies that the permissions declared on a consent section are asked for
+/// when leaving it, and only when the step opted in with `askPermission`.
 ///
-/// [RPPermissionType.health] is used throughout because the health plugin talks
-/// over a single method channel which can be faked here, so the tests exercise
-/// the real request path rather than a stub of it.
+/// [RPPermissionType.health] is used throughout because its single method
+/// channel can be faked, so the real request path runs.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   /// The channel of the `health` plugin, faked below.
   const healthChannel = MethodChannel('flutter_health');
 
-  /// The health data types this study reads. Two of them, because the point of
-  /// [RPConsentSection.healthDataTypes] is that health is not one permission.
+  /// The health data types this study reads - two, because health is not one
+  /// permission.
   const healthTypes = [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP];
   const healthTypeNames = ['STEPS', 'SLEEP_ASLEEP'];
 
-  /// A consent document whose first section asks for health data and whose
-  /// second section asks for nothing.
+  /// A document whose first section asks for health data and whose second asks
+  /// for nothing.
   RPConsentDocument documentWithHealthOnFirstSection() => RPConsentDocument(
     title: 'Consent',
     sections: [
       RPConsentSection(
-        // A Custom section with its own illustration, so the test does not
-        // depend on the package's image assets.
+        // A Custom section, so no image asset of the package is needed.
         type: RPConsentSectionType.Custom,
         title: 'Health data',
         summary: 'Why we need your health data',
@@ -49,8 +46,7 @@ void main() {
     ],
   );
 
-  /// A three section document whose *middle* section asks for health data, so
-  /// that the permission section is neither the first nor the last one.
+  /// A three section document whose *middle* section asks for health data.
   RPConsentDocument documentWithHealthOnMiddleSection() => RPConsentDocument(
     title: 'Consent',
     sections: [
@@ -93,7 +89,7 @@ void main() {
   late List<RPResult> sentResults;
   late StreamSubscription<RPResult> subscription;
 
-  /// What the faked plugin answers. `hasPermissions` returning null is the iOS
+  /// What the faked plugin answers. A null `hasPermissions` is the iOS
   /// behaviour - HealthKit does not disclose read access.
   late bool? alreadyGranted;
   late bool authorizationSucceeds;
@@ -140,8 +136,7 @@ void main() {
         ),
       );
 
-      // Nothing is asked for while the section is still being read - only when
-      // the participant moves on from it.
+      // Only asked for when the participant moves on from the section.
       expect(requested, isEmpty);
 
       await tapForward(tester, 'NEXT');
@@ -171,8 +166,7 @@ void main() {
     expect(sentResults, hasLength(1));
     final result = sentResults.single;
     expect(result, isA<RPPermissionResult>());
-    // Keyed by the step identifier, which is how RPUITask files it on the task
-    // result.
+    // Keyed by the step identifier, as RPUITask files it.
     expect(result.identifier, 'visualStep');
     expect((result as RPPermissionResult).statuses, {
       RPPermissionType.health: RPPermissionStatus.granted,
@@ -183,9 +177,8 @@ void main() {
     tester,
   ) async {
     final document = documentWithHealthOnFirstSection();
-    // Both sections ask for health, so leaving the second one would prompt again
-    // if granted permissions were not skipped. The types have to be set too,
-    // otherwise the second section would ask for nothing regardless.
+    // Both sections ask for health, so the second would prompt again if
+    // granted permissions were not skipped.
     document.sections.last.permissions = [RPPermissionType.health];
     document.sections.last.healthDataTypes = healthTypes;
 
@@ -213,8 +206,7 @@ void main() {
         RPVisualConsentStep(
           identifier: 'visualStep',
           consentDocument: documentWithHealthOnFirstSection(),
-          // Not passing askPermission at all - the default has to stay opt-out so
-          // that existing consent flows keep behaving as before.
+          // Not passing askPermission at all - it has to stay opt-out.
         ),
       ),
     );
@@ -226,9 +218,8 @@ void main() {
     expect(sentResults, isEmpty);
   });
 
-  /// Health is not a single permission - HealthKit and Health Connect authorise
-  /// each data type on its own - so the section says which types it needs and
-  /// those are what reaches the plugin.
+  /// Health is not a single permission, so the section says which types it
+  /// needs and those are what reaches the plugin.
   group('health data types', () {
     Future<RPPermissionResult> runStep(
       WidgetTester tester,
@@ -268,8 +259,7 @@ void main() {
       tester,
     ) async {
       final document = documentWithHealthOnFirstSection();
-      // RPPermissionType.health on its own says nothing about what to request,
-      // so there is no authorisation sheet to show.
+      // With no types there is nothing to request, so no sheet to show.
       document.sections.first.healthDataTypes = null;
 
       final result = await runStep(tester, document);
@@ -283,8 +273,7 @@ void main() {
     testWidgets('data already authorised is not asked for again', (
       tester,
     ) async {
-      // The health plugin warns that requestAuthorization can block when access
-      // was already granted, so it must not be reached in this case.
+      // requestAuthorization can block when access was already granted.
       alreadyGranted = true;
 
       final result = await runStep(tester, documentWithHealthOnFirstSection());
@@ -310,10 +299,9 @@ void main() {
     });
   });
 
-  /// Apple does not allow the screen which explains an upcoming permission
-  /// request to offer any way out other than the system alert it leads to - see
-  /// the Privacy section of the Human Interface Guidelines. These tests pin the
-  /// resulting button layout of the consent step.
+  /// A screen explaining an upcoming permission request may offer no way out
+  /// but the alert it leads to (Apple HIG, Privacy). These tests pin the
+  /// resulting button layout.
   group('a section explaining a permission offers no way out but the alert', () {
     testWidgets('it carries the forward button and nothing else', (
       tester,
@@ -328,8 +316,7 @@ void main() {
         ),
       );
 
-      // Page onto the health section. It is not the first one, so without the
-      // permission it declares it would show a Back button.
+      // Onto the health section - not the first, so it would show Back.
       await tapForward(tester, 'NEXT');
       expect(find.text('Health data'), findsOneWidget);
 
@@ -353,8 +340,7 @@ void main() {
       await tapForward(tester, 'NEXT');
       expect(requested, [healthTypeNames]);
 
-      // Coming back to it, the section is no longer about to open an alert, so
-      // it behaves like any other section again.
+      // No longer about to open an alert, so it behaves normally again.
       await tapForward(tester, 'BACK');
       expect(find.text('Health data'), findsOneWidget);
       expect(find.text('BACK'), findsOneWidget);
@@ -397,8 +383,7 @@ void main() {
         app(
           RPVisualConsentStep(
             identifier: 'visualStep',
-            // Without askPermission no section is a permission screen, so Back
-            // is offered on every section but the first.
+            // Without askPermission no section is a permission screen.
             consentDocument: documentWithHealthOnMiddleSection(),
           ),
         ),
@@ -428,8 +413,8 @@ void main() {
       await tapForward(tester, 'NEXT');
       expect(find.text('SEE SUMMARY'), findsOneWidget);
 
-      // Going back has to un-set "last page" - otherwise the forward button
-      // would still finish the step from the middle of the document.
+      // Going back has to un-set "last page", or the forward button would
+      // finish the step from the middle of the document.
       await tapForward(tester, 'BACK');
       expect(find.text('SEE SUMMARY'), findsNothing);
       expect(find.text('NEXT'), findsOneWidget);
@@ -456,8 +441,7 @@ void main() {
           theme: carpTheme,
           home: RPUITask(
             task: task,
-            // The default is an asset of this package, which does not resolve
-            // in a widget test.
+            // The default is an asset, which no widget test resolves.
             carouselBarImage: Image.memory(transparentPixelPng),
           ),
         ),
@@ -494,8 +478,7 @@ void main() {
   });
 }
 
-/// A 1x1 transparent PNG, so a widget test can supply an image without reaching
-/// for an asset.
+/// A 1x1 transparent PNG, so a test can supply an image without an asset.
 final Uint8List transparentPixelPng = base64Decode(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
 );
