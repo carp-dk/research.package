@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:carp_themes_package/carp_themes_package.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,33 @@ void main() {
       RPConsentSection(
         // A Custom section with its own illustration, so the test does not
         // depend on the package's image assets.
+        type: RPConsentSectionType.Custom,
+        title: 'Health data',
+        summary: 'Why we need your health data',
+        customIllustration: const SizedBox.shrink(),
+        permissions: [RPPermissionType.health],
+      ),
+      RPConsentSection(
+        type: RPConsentSectionType.Custom,
+        title: 'Your rights',
+        summary: 'What you can do',
+        customIllustration: const SizedBox.shrink(),
+      ),
+    ],
+  );
+
+  /// A three section document whose *middle* section asks for health data, so
+  /// that the permission section is neither the first nor the last one.
+  RPConsentDocument documentWithHealthOnMiddleSection() => RPConsentDocument(
+    title: 'Consent',
+    sections: [
+      RPConsentSection(
+        type: RPConsentSectionType.Custom,
+        title: 'Welcome',
+        summary: 'What this study is about',
+        customIllustration: const SizedBox.shrink(),
+      ),
+      RPConsentSection(
         type: RPConsentSectionType.Custom,
         title: 'Health data',
         summary: 'Why we need your health data',
@@ -163,4 +192,193 @@ void main() {
     expect(requested, isEmpty);
     expect(sentResults, isEmpty);
   });
+
+  /// Apple does not allow the screen which explains an upcoming permission
+  /// request to offer any way out other than the system alert it leads to - see
+  /// the Privacy section of the Human Interface Guidelines. These tests pin the
+  /// resulting button layout of the consent step.
+  group('a section explaining a permission offers no way out but the alert', () {
+    testWidgets('it carries the forward button and nothing else', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: documentWithHealthOnMiddleSection(),
+            askPermission: true,
+          ),
+        ),
+      );
+
+      // Page onto the health section. It is not the first one, so without the
+      // permission it declares it would show a Back button.
+      await tapForward(tester, 'NEXT');
+      expect(find.text('Health data'), findsOneWidget);
+
+      expect(find.text('BACK'), findsNothing);
+      expect(find.text('CANCEL'), findsNothing);
+    });
+
+    testWidgets('Back returns once the alert has been shown', (tester) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: documentWithHealthOnMiddleSection(),
+            askPermission: true,
+          ),
+        ),
+      );
+
+      // Onto the health section, then past it - which is what shows the alert.
+      await tapForward(tester, 'NEXT');
+      await tapForward(tester, 'NEXT');
+      expect(requested, [RPPermissionType.health]);
+
+      // Coming back to it, the section is no longer about to open an alert, so
+      // it behaves like any other section again.
+      await tapForward(tester, 'BACK');
+      expect(find.text('Health data'), findsOneWidget);
+      expect(find.text('BACK'), findsOneWidget);
+    });
+
+    testWidgets('the consent step has no cancel button at all', (tester) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: documentWithHealthOnMiddleSection(),
+          ),
+        ),
+      );
+
+      for (var section = 0; section < 3; section++) {
+        expect(find.text('CANCEL'), findsNothing);
+        if (section < 2) await tapForward(tester, 'NEXT');
+      }
+    });
+  });
+
+  group('navigating back through the consent sections', () {
+    testWidgets('the first section has nothing to go back to', (tester) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: documentWithHealthOnMiddleSection(),
+          ),
+        ),
+      );
+
+      expect(find.text('Welcome'), findsOneWidget);
+      expect(find.text('BACK'), findsNothing);
+    });
+
+    testWidgets('Back returns to the previous section', (tester) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            // Without askPermission no section is a permission screen, so Back
+            // is offered on every section but the first.
+            consentDocument: documentWithHealthOnMiddleSection(),
+          ),
+        ),
+      );
+
+      await tapForward(tester, 'NEXT');
+      expect(find.text('Health data'), findsOneWidget);
+
+      await tapForward(tester, 'BACK');
+      expect(find.text('Welcome'), findsOneWidget);
+      expect(find.text('BACK'), findsNothing);
+    });
+
+    testWidgets('leaving the last section restores the NEXT label', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: documentWithHealthOnMiddleSection(),
+          ),
+        ),
+      );
+
+      await tapForward(tester, 'NEXT');
+      await tapForward(tester, 'NEXT');
+      expect(find.text('SEE SUMMARY'), findsOneWidget);
+
+      // Going back has to un-set "last page" - otherwise the forward button
+      // would still finish the step from the middle of the document.
+      await tapForward(tester, 'BACK');
+      expect(find.text('SEE SUMMARY'), findsNothing);
+      expect(find.text('NEXT'), findsOneWidget);
+    });
+  });
+
+  group('the close button of the task', () {
+    RPConsentReviewStep reviewStep(RPConsentDocument document) =>
+        RPConsentReviewStep(
+          identifier: 'reviewStep',
+          title: 'Review',
+          consentDocument: document,
+        );
+
+    RPVisualConsentStep visualStep(RPConsentDocument document) =>
+        RPVisualConsentStep(
+          identifier: 'visualStep',
+          consentDocument: document,
+        );
+
+    Future<void> pumpTask(WidgetTester tester, RPOrderedTask task) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: carpTheme,
+          home: RPUITask(
+            task: task,
+            // The default is an asset of this package, which does not resolve
+            // in a widget test.
+            carouselBarImage: Image.memory(transparentPixelPng),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'an informed consent flow has none - it is left with DISAGREE',
+      (tester) async {
+        final document = documentWithHealthOnMiddleSection();
+        await pumpTask(
+          tester,
+          // The presence of a review step is what makes this a consent task.
+          RPOrderedTask(
+            identifier: 'consentTask',
+            steps: [visualStep(document), reviewStep(document)],
+          ),
+        );
+
+        expect(find.byIcon(Icons.highlight_off), findsNothing);
+      },
+    );
+
+    testWidgets('any other task keeps it', (tester) async {
+      final document = documentWithHealthOnMiddleSection();
+      await pumpTask(
+        tester,
+        RPOrderedTask(identifier: 'plainTask', steps: [visualStep(document)]),
+      );
+
+      expect(find.byIcon(Icons.highlight_off), findsOneWidget);
+    });
+  });
 }
+
+/// A 1x1 transparent PNG, so a widget test can supply an image without reaching
+/// for an asset.
+final Uint8List transparentPixelPng = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+);

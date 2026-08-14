@@ -42,6 +42,19 @@
 * New dependency: `permission_handler: '>=12.0.0 <13.0.0'`. Apps which use
   `askPermission` must declare the permissions they ask for natively — see the
   "OS permissions" section of the README. Apps which do not use it need no setup.
+* Added a "BACK" button to `RPUIVisualConsentStep`, for re-reading earlier
+  sections — the step used to be forward only. It is hidden on the first section,
+  and on a section which is still going to open a permission alert. Once that
+  section's permissions have been asked for, "BACK" reappears on it.
+* **Breaking:** an informed consent flow — an `RPOrderedTask` containing an
+  `RPConsentReviewStep` — no longer shows the close button in the top bar, and
+  the visual consent step no longer shows a "CANCEL" button. Apple requires that
+  a screen explaining an upcoming permission request offers no way out other than
+  the system alert it leads to, and the permission sections sit inside this flow.
+  Such a task is now left by pressing "DISAGREE" on the review step. This also
+  removes an inconsistency: the old "CANCEL" button popped the route directly
+  without calling `RPUITask.onCancel`, which "DISAGREE" does call. Tasks which
+  are not consent tasks keep their close button.
 * **Breaking:** `RPUIVisualConsentStep` now takes the `RPVisualConsentStep` as
   `step:` instead of taking `consentDocument:`. This only affects code which
   instantiates the widget directly, which is not normally needed — the step

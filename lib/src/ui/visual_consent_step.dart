@@ -29,6 +29,28 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   /// still up.
   bool _requestingPermissions = false;
 
+  /// The permissions declared on the section currently on screen. Empty when it
+  /// declares none, or when the step did not opt in with `askPermission`.
+  List<RPPermissionType> get _permissionsOnScreen => _permissionResult == null
+      ? const []
+      : widget.step.consentDocument.sections[_pageNr].permissions ?? const [];
+
+  /// Whether tapping the forward button on the section currently on screen is
+  /// still going to open a system permission alert.
+  ///
+  /// Apple requires such a screen to carry a single button which leads to the
+  /// alert, and no way of leaving it without seeing the alert - so BACK is
+  /// hidden while this is true. Once the alert has been shown, whatever the
+  /// participant answered, the screen is an ordinary consent section again and
+  /// BACK returns. It keys on whether the permission was *asked for* rather
+  /// than granted, because a denial does not re-open the alert either.
+  bool get _awaitsPermissionAlert {
+    final result = _permissionResult;
+    if (result == null) return false;
+    return _permissionsOnScreen
+        .any((permission) => !result.statuses.containsKey(permission));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -45,12 +67,12 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
     super.dispose();
   }
 
-  void _goToNextPage(int pageNr) {
+  void _onPageChanged(int pageNr) {
     setState(() {
       _pageNr = pageNr;
-      if (_pageNr == widget.step.consentDocument.sections.length - 1) {
-        _lastPage = true;
-      }
+      // Recomputed rather than latched, so that going back from the last
+      // section turns "SEE SUMMARY" into "NEXT" again.
+      _lastPage = _pageNr == widget.step.consentDocument.sections.length - 1;
     });
   }
 
@@ -64,9 +86,8 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
     final result = _permissionResult;
     if (result == null || _requestingPermissions) return;
 
-    final permissions =
-        widget.step.consentDocument.sections[_pageNr].permissions;
-    if (permissions == null || permissions.isEmpty) return;
+    final permissions = _permissionsOnScreen;
+    if (permissions.isEmpty) return;
 
     _requestingPermissions = true;
     try {
@@ -105,44 +126,16 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
     }
   }
 
+  /// Returns to the previous section, so the participant can re-read it.
+  Future<void> _goBack() => _controller.previousPage(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.fastOutSlowIn);
+
   void _pushContent(String title, String content) {
     Navigator.of(context).push(
       MaterialPageRoute<dynamic>(
         builder: (context) => _DetailTextRoute(title: title, content: content),
       ),
-    );
-  }
-
-  void _showCancelDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) {
-        RPLocalizations? locale = RPLocalizations.of(context);
-        return AlertDialog(
-          content: Text(
-            locale?.translate('quit_confirmation') ??
-                "Are you sure you want to quit?",
-          ),
-          actions: <Widget>[
-            OutlinedButton(
-              child: Text(
-                locale?.translate('NO') ?? "NO",
-                style: TextStyle(color: Theme.of(context).primaryColor),
-              ),
-              onPressed: () => Navigator.of(context).pop(), // Pop the popup,
-            ),
-            ElevatedButton(
-              child: Text(
-                RPLocalizations.of(context)?.translate('YES') ?? 'YES',
-              ),
-              onPressed: () {
-                Navigator.of(context).pop(); // Pop the popup
-                Navigator.of(context).pop(); // Pop the screen
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -403,6 +396,12 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
   }
 
   Widget _navigationButtons() {
+    // No Back on the first section, and none on a section which is still about
+    // to open a system permission alert - that screen offers the forward button
+    // and nothing else. The slot is kept even when empty so the forward button
+    // does not move between sections.
+    final showBackButton = _pageNr > 0 && !_awaitsPermissionAlert;
+
     return Container(
       padding: const EdgeInsets.only(
         bottom: 15.0,
@@ -413,13 +412,15 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          OutlinedButton(
-            child: Text(
-              RPLocalizations.of(context)?.translate('CANCEL') ?? 'CANCEL',
-              style: TextStyle(color: Theme.of(context).primaryColor),
-            ),
-            onPressed: () => _showCancelDialog(),
-          ),
+          !showBackButton
+              ? const SizedBox.shrink()
+              : OutlinedButton(
+                  onPressed: _goBack,
+                  child: Text(
+                    RPLocalizations.of(context)?.translate('BACK') ?? 'BACK',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                ),
           FilledButton(
             onPressed: _proceed,
             child: _lastPage
@@ -449,9 +450,7 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
               _progressIndicator(),
               Expanded(
                 child: PageView.builder(
-                  onPageChanged: (pageNr) {
-                    _goToNextPage(pageNr);
-                  },
+                  onPageChanged: _onPageChanged,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.step.consentDocument.sections.length,
                   controller: _controller,

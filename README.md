@@ -112,6 +112,22 @@ The outcome of every request is collected in an `RPPermissionResult` added to th
 under the identifier of the visual consent step. A denied permission is recorded but never blocks the
 participant.
 
+### Navigation in a consent flow
+
+Apple requires that a screen explaining an upcoming permission request carries a single button,
+leading to the system alert, and offers no way of leaving without seeing that alert — see
+[Human Interface Guidelines: Privacy](https://developer.apple.com/design/human-interface-guidelines/privacy).
+The consent UI enforces this, so a flow using `askPermission` passes review as it is:
+
+* An informed consent flow — any `RPOrderedTask` containing an `RPConsentReviewStep` — has **no
+  close button** in the top bar and **no cancel button** on the consent sections. It is left by
+  pressing "DISAGREE" on the review step, which calls `RPUITask.onCancel` as a cancellation always
+  has.
+* The visual consent step offers a "BACK" button for re-reading earlier sections. It is hidden on
+  the first section, and on any section which is still going to open a permission alert.
+* Once a section's permissions have been asked for, "BACK" reappears on it — the alert has been
+  seen, whatever the participant answered, so the screen is an ordinary consent section again.
+
 `RPPermissionType.health` is not covered by the underlying `permission_handler` plugin, so the app
 has to supply the request — for instance with the [health](https://pub.dev/packages/health) package:
 

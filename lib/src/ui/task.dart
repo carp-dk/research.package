@@ -354,20 +354,29 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                   : Container(),
             ),
             // Close button
+            //
+            // An informed consent flow has none: a section which explains an
+            // upcoming permission request may not offer a way out other than
+            // the system alert (Apple HIG, Privacy). Such a flow is left with
+            // DISAGREE on the consent review step instead. The slot itself is
+            // kept so the carousel indicator stays where it is.
             Expanded(
               flex: 5,
-              child: IconButton(
-                padding: const EdgeInsets.only(right: 30),
-                alignment: Alignment.centerRight,
-                icon: Icon(
-                  Icons.highlight_off,
-                  color: ((CupertinoTheme.of(context).primaryColor ==
-                          CupertinoColors.activeBlue)
-                      ? Theme.of(context).primaryColor
-                      : CupertinoTheme.of(context).primaryColor),
-                ),
-                onPressed: () => blocTask.sendStatus(RPStepStatus.Canceled),
-              ),
+              child: widget.task.isConsentTask
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      padding: const EdgeInsets.only(right: 30),
+                      alignment: Alignment.centerRight,
+                      icon: Icon(
+                        Icons.highlight_off,
+                        color: ((CupertinoTheme.of(context).primaryColor ==
+                                CupertinoColors.activeBlue)
+                            ? Theme.of(context).primaryColor
+                            : CupertinoTheme.of(context).primaryColor),
+                      ),
+                      onPressed: () =>
+                          blocTask.sendStatus(RPStepStatus.Canceled),
+                    ),
             ),
           ],
         ),
