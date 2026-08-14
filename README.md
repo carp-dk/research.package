@@ -30,6 +30,62 @@ There is a set of tutorials, describing:
 
 The [Research Package Flutter API](https://pub.dev/documentation/research_package/latest/) is available (and maintained) as part of the package release at pub.dev.
 
+## Localization
+
+Translations live in `assets/lang/<languageCode>.json` and are looked up with
+`RPLocalizations.of(context)?.translate('key')`. A key which is not translated is returned as-is, so
+it is safe to pass text which may be either a key or a literal.
+
+**Nested keys.** Translations may be nested and are addressed with a dot-separated path. These two
+files are equivalent, so nested and dot-separated files can be mixed freely and existing flat files
+keep working untouched:
+
+```json
+{ "pages": { "task_list": { "title": "Tasks", "description": "Your tasks" } } }
+{ "pages.task_list.title": "Tasks", "pages.task_list.description": "Your tasks" }
+```
+
+```dart
+locale.translate('pages.task_list.title'); // 'Tasks'
+```
+
+**Interpolation.** `{{placeholder}}` values are filled in from `args`. A placeholder with no
+matching argument is left in place, so a forgotten argument is visible rather than silently blank. A
+single brace is always literal.
+
+```json
+{ "greeting": "Hello {{name}}, you have {{n}} messages" }
+```
+
+```dart
+locale.translate('greeting', args: {'name': 'Bo', 'n': 3});
+// 'Hello Bo, you have 3 messages'
+```
+
+**Plurals.** Give a key one variant per plural category using the `_zero`, `_one`, `_two`, `_few`,
+`_many` and `_other` suffixes, and pass a `count`. The category is picked using the CLDR rules of the
+locale, so a language which needs `_few` and `_many` gets them. `count` is also available to the
+translation as `{{count}}` without passing it in `args`.
+
+```json
+{
+  "tasks_zero": "All done",
+  "tasks_one": "{{count}} task left",
+  "tasks_other": "{{count}} tasks left"
+}
+```
+
+```dart
+locale.translate('tasks', count: 0); // 'All done'
+locale.translate('tasks', count: 1); // '1 task left'
+locale.translate('tasks', count: 5); // '5 tasks left'
+```
+
+Which categories apply depends on the language — English only ever uses `_one` and `_other`. The one
+exception is `_zero`, which is used for a `count` of exactly 0 in any language when present. A
+category which is not translated falls back to `_other`, and a key with no plural variants at all
+falls back to the key itself.
+
 ## Example Application
 
 There is an [example app](https://github.com/cph-cachet/research.package/tree/master/example) which demonstrates the different features of Research Package as implemented in a Flutter app.

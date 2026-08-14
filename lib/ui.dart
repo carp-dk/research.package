@@ -19,6 +19,9 @@ import 'package:signature/signature.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:video_player/video_player.dart';
 
+// For the CLDR plural rules used when translating with a `count`.
+import 'package:intl/intl.dart';
+
 import 'model.dart';
 
 // Library elements

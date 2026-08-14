@@ -1,6 +1,6 @@
 name: research_package
 description: A Flutter framework for obtaining informed consent, showing surveys and collecting results.
-version: 2.5.0
+version: 2.6.0
 homepage: https://github.com/cph-cachet/research.package
 
 environment:
@@ -20,6 +20,7 @@ dependencies:
   audioplayers: ^6.7.0
   video_player: ^2.11.1
   plugin_platform_interface: ^2.0.2
+  intl: '>=0.19.0 <0.21.0'  # For the CLDR plural rules used in translations
 
 # Overriding carp core libraries to use the local copy
 # Remove this before release of package
@@ -31,6 +32,9 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  # Needed by test/example_json_test.dart, which imports the example app.
+  flutter_localizations:
     sdk: flutter
   build_runner: any
   json_serializable: any

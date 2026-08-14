@@ -52,15 +52,15 @@ class RPLocalizations extends AssetLocalizations {
     }
 
     final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-    translations
-        .addAll(jsonMap.map((key, value) => MapEntry(key, value.toString())));
+    translations.addAll(AssetLocalizations.flatten(jsonMap));
 
     for (LocalizationLoader loader in loaders) {
-      Map<String, String> loadedTranslations = await loader.load(locale);
+      Map<String, dynamic> loadedTranslations = await loader.load(locale);
       // Merge the maps.
       // Note that keys in [_translations] is overwritten with keys in [loadedTranslations].
       // Hence, it is possible to overwrite the default translations.
-      translations.addAll(loadedTranslations);
+      // Flattened here so that a loader may return nested translations.
+      translations.addAll(AssetLocalizations.flatten(loadedTranslations));
     }
   }
 
@@ -110,7 +110,11 @@ class RPLocalizationsDelegate extends LocalizationsDelegate<RPLocalizations> {
 /// map for a [Locale].
 abstract class LocalizationLoader {
   /// Load translations for [locale].
-  Future<Map<String, String>> load(Locale locale);
+  ///
+  /// The map may be nested, in which case it is flattened into dot-separated
+  /// keys when merged - see [AssetLocalizations.flatten]. Returning a flat
+  /// `Map<String, String>` remains valid.
+  Future<Map<String, dynamic>> load(Locale locale);
 }
 
 /// A [LocalizationLoader] which can load translations from a map.
@@ -126,13 +130,15 @@ abstract class LocalizationLoader {
 /// ```
 class MapLocalizationLoader implements LocalizationLoader {
   /// The map between a language code and the localizations for this language.
-  final Map<String, Map<String, String>> map;
+  ///
+  /// The localizations of a language may be nested.
+  final Map<String, Map<String, dynamic>> map;
 
   /// Create a [MapLocalizationLoader] based on the [map].
   MapLocalizationLoader(this.map);
 
   @override
-  Future<Map<String, String>> load(Locale locale) async =>
+  Future<Map<String, dynamic>> load(Locale locale) async =>
       (map.containsKey(locale.languageCode)) ? map[locale.languageCode]! : {};
 }
 
@@ -147,16 +153,13 @@ class AssetLocalizationLoader implements LocalizationLoader {
   const AssetLocalizationLoader({this.basePath = 'assets/lang'});
 
   @override
-  Future<Map<String, String>> load(Locale locale) async {
+  Future<Map<String, dynamic>> load(Locale locale) async {
     String path = '$basePath/${locale.languageCode}.json';
     print("$runtimeType - loading '$path'");
     String jsonString = await rootBundle.loadString(path);
 
-    Map<String, dynamic> jsonMap =
-        json.decode(jsonString) as Map<String, dynamic>;
-    Map<String, String> translations =
-        jsonMap.map((key, value) => MapEntry(key, value.toString()));
-
-    return translations;
+    // Returned as decoded, so nested translations survive to be flattened when
+    // merged.
+    return json.decode(jsonString) as Map<String, dynamic>;
   }
 }

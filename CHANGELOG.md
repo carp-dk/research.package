@@ -1,5 +1,27 @@
 ## 3.0.0
 
+* Localization now supports nested translation keys. A nested json object is
+  flattened into a dot-separated path, so `{"pages": {"task_list": {"title": ...}}}`
+  and `{"pages.task_list.title": ...}` are equivalent and existing flat
+  translation files keep working unchanged.
+* Localization now supports `{{placeholder}}` interpolation via the new `args`
+  argument of `translate()`, e.g.
+  `translate('greeting', args: {'name': 'Bo'})`. A placeholder with no matching
+  argument is left in place rather than rendered blank. A single brace stays
+  literal.
+* Localization now supports plurals via the new `count` argument of
+  `translate()`, using the `_zero`, `_one`, `_two`, `_few`, `_many` and `_other`
+  key suffixes. The category is selected with the CLDR rules of the locale, and
+  `count` is available to the translation as `{{count}}`. `_zero` is used for a
+  count of exactly 0 in any language when present; a missing category falls back
+  to `_other`, and a key with no plural variants falls back to the key itself.
+* `translate()` remains backwards compatible — `translate('key')` behaves exactly
+  as before, including returning the key when it is not translated.
+* `LocalizationLoader.load` now returns `Future<Map<String, dynamic>>` so a
+  loader may return nested translations. Existing loaders returning
+  `Future<Map<String, String>>` are still valid overrides and need no change.
+  `MapLocalizationLoader` accordingly takes `Map<String, Map<String, dynamic>>`.
+* New dependency: `intl: '>=0.19.0 <0.21.0'`, for the CLDR plural rules.
 * Added `RPUITask.carouselBarBuilder` for replacing the default carousel bar
   (logo, "x of y" progress and close button) with a custom widget. Return
   `const SizedBox.shrink()` to hide the bar entirely. When the builder is
