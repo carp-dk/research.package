@@ -136,6 +136,31 @@ void main() {
       expect(overviewSection.content, "Overview content");
     });
 
+    test('RPConsentSection with health data types survives a round trip', () {
+      // The health types are serialized through an enum map generated from the
+      // health package's 100+ HealthDataType values, so a regeneration which
+      // misses them would silently drop what a study is allowed to read.
+      final section = RPConsentSection(
+        type: RPConsentSectionType.Health,
+        summary: 'Why we read your health data',
+        permissions: [RPPermissionType.health],
+        healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+      );
+
+      final restored = RPConsentSection.fromJson(
+          json.decode(toJsonString(section)) as Map<String, dynamic>);
+
+      expect(restored.healthDataTypes,
+          [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP]);
+      expect(restored.permissions, [RPPermissionType.health]);
+    });
+
+    test('a section without health data types omits them entirely', () {
+      // Consent documents written before this field existed have to serialize
+      // byte-identically, so the key may not appear when it is not set.
+      expect(toJsonString(overviewSection), isNot(contains('healthDataTypes')));
+    });
+
     test('JSON -> RPConsentDocument, assert document title', () {
       final consentDocumentJson = toJsonString(consentDocument);
 

@@ -37,9 +37,10 @@ enum RPPermissionType {
 
   /// Access to health data (Apple HealthKit / Android Health Connect).
   ///
-  /// Health data is not covered by the permission plugin used by Research
-  /// Package, so this type is only requested if the app has registered a
-  /// [RPPermissions.healthHandler]. Without one it resolves to
+  /// Unlike the others this is not a single OS permission — both platforms
+  /// authorise each health data type separately — so the section must also
+  /// list the types it needs in [RPConsentSection.healthDataTypes]. Without
+  /// them there is nothing to ask for and this resolves to
   /// [RPPermissionStatus.unsupported].
   health,
 }
@@ -60,8 +61,8 @@ enum RPPermissionStatus {
   restricted,
 
   /// The permission does not exist on this platform, or it is
-  /// [RPPermissionType.health] and no [RPPermissions.healthHandler] is
-  /// registered.
+  /// [RPPermissionType.health] and the section listed no
+  /// [RPConsentSection.healthDataTypes] to ask for.
   unsupported,
 
   /// The status could not be determined, e.g. because no platform

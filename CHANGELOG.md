@@ -35,10 +35,22 @@
   the `RPVisualConsentStep`, holding the status of every permission which was
   asked for. A denied permission is recorded but never blocks the participant.
 * Added `RPPermissions.request()` for asking for a single permission outside a
-  consent flow, and `RPPermissions.healthHandler` — health data is not covered by
-  `permission_handler`, so `RPPermissionType.health` needs the app to supply the
-  request (e.g. through the `health` package). Without a handler it resolves to
-  `RPPermissionStatus.unsupported`.
+  consent flow.
+* `RPPermissionType.health` is now requested by Research Package itself, through
+  the `health` package. Health data is not one permission — HealthKit and Health
+  Connect authorise each of the 100+ data types separately — so a section which
+  lists it must also list the types it needs in the new
+  `RPConsentSection.healthDataTypes`; without them there is nothing to ask for
+  and it resolves to `RPPermissionStatus.unsupported`. `HealthDataType` is
+  re-exported, and `RPPermissions.requestHealthData()` is public for asking
+  outside a consent flow. Note that on iOS the resulting status is optimistic:
+  HealthKit does not disclose whether read access was granted, so `granted`
+  means the authorisation sheet was shown without error.
+* New dependency: `health: '>=13.0.0 <14.0.0'`. **This raises the Android
+  requirement to `minSdkVersion 26` for every app using research_package**, and
+  apps which ask for health data must extend `FlutterFragmentActivity` and
+  declare the Health Connect entries in their manifest — see the "Health data"
+  part of the README's platform setup.
 * New dependency: `permission_handler: '>=12.0.0 <13.0.0'`. Apps which use
   `askPermission` must declare the permissions they ask for natively — see the
   "OS permissions" section of the README. Apps which do not use it need no setup.

@@ -35,6 +35,10 @@
 	<string>The microphone is used to measure the background noise around you.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion data is used to recognize your physical activity during the study.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Your health data is read to study how your activity and sleep change during the study.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>The study does not write to Apple Health, but HealthKit requires this description.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

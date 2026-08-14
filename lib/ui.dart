@@ -25,6 +25,10 @@ import 'package:intl/intl.dart';
 // Prefixed so that the plugin's `Permission` and `PermissionStatus` do not enter
 // the namespace shared by all the part files of this library.
 import 'package:permission_handler/permission_handler.dart' as ph;
+// Health data is not covered by permission_handler, so it is asked for through
+// the health plugin instead. Only the two names needed are imported, for the
+// same reason the plugin above is prefixed.
+import 'package:health/health.dart' show Health, HealthDataType;
 
 import 'model.dart';
 

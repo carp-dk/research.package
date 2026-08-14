@@ -11,34 +11,24 @@ part of '../../ui.dart';
 class RPPermissions {
   RPPermissions._();
 
-  /// Requests access to health data (Apple HealthKit / Android Health Connect).
-  ///
-  /// Health data is not covered by the `permission_handler` plugin used by
-  /// Research Package, so an app which uses [RPPermissionType.health] has to
-  /// provide the request itself. For example, using the `health` package:
-  ///
-  /// ```dart
-  /// RPPermissions.healthHandler = () async =>
-  ///     await Health().requestAuthorization(types)
-  ///         ? RPPermissionStatus.granted
-  ///         : RPPermissionStatus.denied;
-  /// ```
-  ///
-  /// While this is `null`, [RPPermissionType.health] resolves to
-  /// [RPPermissionStatus.unsupported] without showing anything.
-  static Future<RPPermissionStatus> Function()? healthHandler;
-
   /// Asks the OS for [type] and returns the outcome.
   ///
   /// If the participant has already granted the permission the OS does not show
   /// a dialog and [RPPermissionStatus.granted] is returned right away.
   ///
+  /// [healthDataTypes] is only used for [RPPermissionType.health], which is not
+  /// a single permission — see [requestHealthData]. Without it that type
+  /// resolves to [RPPermissionStatus.unsupported].
+  ///
   /// Never throws — a platform without an implementation for the permission
   /// resolves to [RPPermissionStatus.unknown] rather than interrupting the
   /// consent flow.
-  static Future<RPPermissionStatus> request(RPPermissionType type) async {
+  static Future<RPPermissionStatus> request(
+    RPPermissionType type, {
+    List<HealthDataType> healthDataTypes = const [],
+  }) async {
     if (type == RPPermissionType.health) {
-      return await healthHandler?.call() ?? RPPermissionStatus.unsupported;
+      return await requestHealthData(healthDataTypes);
     }
 
     try {
@@ -54,6 +44,44 @@ class RPPermissions {
       return _statusOf(await _permissionOf(type).request());
     } catch (error) {
       debugPrint('$RPPermissions - error requesting $type - error: $error');
+      return RPPermissionStatus.unknown;
+    }
+  }
+
+  /// Requests read access to health [types] and returns the outcome.
+  ///
+  /// Health data is not one permission: Apple HealthKit and Android Health
+  /// Connect authorise each [HealthDataType] separately, so the caller has to
+  /// say which ones the study reads. An empty list resolves to
+  /// [RPPermissionStatus.unsupported] — there is nothing to ask for.
+  ///
+  /// Nothing is requested when access to all of [types] has already been given,
+  /// because `requestAuthorization` can block in that case.
+  ///
+  /// **On iOS the returned status is optimistic.** HealthKit does not disclose
+  /// whether read access was granted — for privacy, an app cannot tell the
+  /// difference between "no permission" and "no data" — so
+  /// [RPPermissionStatus.granted] here means the authorisation sheet was shown
+  /// without error, not that the participant agreed. Android Health Connect
+  /// reports the real outcome.
+  static Future<RPPermissionStatus> requestHealthData(
+    List<HealthDataType> types,
+  ) async {
+    if (types.isEmpty) return RPPermissionStatus.unsupported;
+
+    try {
+      final health = Health();
+      // Null on iOS for read access, which is undetermined rather than denied,
+      // so anything but a definite `true` falls through to the request.
+      if (await health.hasPermissions(types) ?? false) {
+        return RPPermissionStatus.granted;
+      }
+
+      return await health.requestAuthorization(types)
+          ? RPPermissionStatus.granted
+          : RPPermissionStatus.denied;
+    } catch (error) {
+      debugPrint('$RPPermissions - error requesting health data - $error');
       return RPPermissionStatus.unknown;
     }
   }
@@ -85,7 +113,7 @@ class RPPermissions {
       case RPPermissionType.bluetooth:
         return ph.Permission.bluetooth;
       case RPPermissionType.health:
-        // Handled by [healthHandler] before this method is reached.
+        // Handled by [requestHealthData] before this method is reached.
         throw UnsupportedError(
           '$RPPermissionType.health is not a platform permission.',
         );

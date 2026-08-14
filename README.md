@@ -128,15 +128,32 @@ The consent UI enforces this, so a flow using `askPermission` passes review as i
 * Once a section's permissions have been asked for, "BACK" reappears on it — the alert has been
   seen, whatever the participant answered, so the screen is an ordinary consent section again.
 
-`RPPermissionType.health` is not covered by the underlying `permission_handler` plugin, so the app
-has to supply the request — for instance with the [health](https://pub.dev/packages/health) package:
+### Health data
+
+Health data is the one entry in `RPPermissionType` which is not a single OS permission. Apple
+HealthKit and Android Health Connect authorise each data type on its own — there are over a hundred
+of them — so a section which lists `RPPermissionType.health` must also say *which* types it needs,
+in `healthDataTypes`. Without them there is nothing to request and the permission resolves to
+`RPPermissionStatus.unsupported`.
 
 ```dart
-RPPermissions.healthHandler = () async =>
-    await Health().requestAuthorization(types)
-        ? RPPermissionStatus.granted
-        : RPPermissionStatus.denied;
+RPConsentSection(
+  type: RPConsentSectionType.Health,
+  summary: 'We read your steps and sleep to see how your activity changes.',
+  permissions: [RPPermissionType.health],
+  healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+);
 ```
+
+`HealthDataType` comes from the [health](https://pub.dev/packages/health) package and is re-exported
+by `research_package`, so it needs no separate import. Read access is requested for every type
+listed; types the participant has already authorised are skipped.
+
+**On iOS the recorded status is optimistic.** HealthKit deliberately does not disclose whether read
+access was granted — an app cannot tell "not permitted" from "no data" — so `granted` there means
+the authorisation sheet was shown without error, not that the participant agreed. Android Health
+Connect reports the real outcome. `RPPermissions.requestHealthData()` is public if an app needs to
+ask outside a consent flow.
 
 ### Platform setup
 
@@ -178,6 +195,25 @@ end
 
 With **Swift Package Manager** this step is not needed — the macros are derived from the
 `Info.plist` keys above.
+
+#### Health data
+
+The `health` plugin is a dependency of `research_package`, so its platform requirements apply to
+**every** app using this package, whether or not it asks for health data:
+
+* **Android** — `minSdkVersion 26`. Apps which ask for health data additionally need, in
+  `AndroidManifest.xml`, a `<uses-permission android:name="android.permission.health.READ_*"/>` per
+  data type, a `<package android:name="com.google.android.apps.healthdata"/>` entry under
+  `<queries>`, an `androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` intent filter on the main
+  activity, and the `ViewPermissionUsageActivity` alias. `MainActivity` must extend
+  `FlutterFragmentActivity` rather than `FlutterActivity`, or Health Connect cannot show its
+  permission sheet on Android 14 and later.
+* **iOS** — `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` in `Info.plist`,
+  plus the **HealthKit** capability on the Runner target, added under "Signing & Capabilities" in
+  Xcode. Without the capability the authorisation sheet never appears.
+
+`example/` is set up this way and can be copied from — see its `AndroidManifest.xml`,
+`MainActivity.kt`, `build.gradle.kts` and `Info.plist`.
 
 ## Example Application
 

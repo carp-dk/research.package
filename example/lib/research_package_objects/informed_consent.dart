@@ -87,13 +87,19 @@ RPOrderedTask get consentTask {
       content: "Location dolor sit amet",
       permissions: [RPPermissionType.location]);
 
-  // Health data needs a `RPPermissions.healthHandler`, which this example does
-  // not register - so this resolves to RPPermissionStatus.unsupported.
+  // Health is not one permission - HealthKit and Health Connect authorise each
+  // data type separately - so the section names the types it needs. Listing
+  // RPPermissionType.health without them would leave nothing to ask for.
   RPConsentSection healthSection = RPConsentSection(
       type: RPConsentSectionType.Health,
       summary: "This is a summary for Health.",
       content: "Health dolor sit amet",
-      permissions: [RPPermissionType.health]);
+      permissions: [RPPermissionType.health],
+      healthDataTypes: [
+        HealthDataType.STEPS,
+        HealthDataType.HEART_RATE,
+        HealthDataType.SLEEP_ASLEEP,
+      ]);
 
   final healthDataCollectionSection = RPConsentSection(
     type: RPConsentSectionType.HealthDataCollection,

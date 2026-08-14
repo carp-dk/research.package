@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:carp_themes_package/carp_themes_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:research_package/research_package.dart';
 
@@ -11,10 +11,20 @@ import 'package:research_package/research_package.dart';
 /// section are asked for when leaving that section, and only when the step opted
 /// in with `askPermission`.
 ///
-/// [RPPermissionType.health] is used throughout because it is resolved through
-/// [RPPermissions.healthHandler] rather than the platform, which keeps these
-/// tests free of a method channel.
+/// [RPPermissionType.health] is used throughout because the health plugin talks
+/// over a single method channel which can be faked here, so the tests exercise
+/// the real request path rather than a stub of it.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  /// The channel of the `health` plugin, faked below.
+  const healthChannel = MethodChannel('flutter_health');
+
+  /// The health data types this study reads. Two of them, because the point of
+  /// [RPConsentSection.healthDataTypes] is that health is not one permission.
+  const healthTypes = [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP];
+  const healthTypeNames = ['STEPS', 'SLEEP_ASLEEP'];
+
   /// A consent document whose first section asks for health data and whose
   /// second section asks for nothing.
   RPConsentDocument documentWithHealthOnFirstSection() => RPConsentDocument(
@@ -28,6 +38,7 @@ void main() {
         summary: 'Why we need your health data',
         customIllustration: const SizedBox.shrink(),
         permissions: [RPPermissionType.health],
+        healthDataTypes: healthTypes,
       ),
       RPConsentSection(
         type: RPConsentSectionType.Custom,
@@ -55,6 +66,7 @@ void main() {
         summary: 'Why we need your health data',
         customIllustration: const SizedBox.shrink(),
         permissions: [RPPermissionType.health],
+        healthDataTypes: healthTypes,
       ),
       RPConsentSection(
         type: RPConsentSectionType.Custom,
@@ -76,23 +88,42 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  late List<RPPermissionType> requested;
+  /// The health data types passed to `requestAuthorization`, one entry per call.
+  late List<List<String>> requested;
   late List<RPResult> sentResults;
   late StreamSubscription<RPResult> subscription;
+
+  /// What the faked plugin answers. `hasPermissions` returning null is the iOS
+  /// behaviour - HealthKit does not disclose read access.
+  late bool? alreadyGranted;
+  late bool authorizationSucceeds;
 
   setUp(() {
     ResearchPackage.ensureInitialized();
     requested = [];
     sentResults = [];
+    alreadyGranted = null;
+    authorizationSucceeds = true;
     subscription = blocTask.stepResult.listen(sentResults.add);
-    RPPermissions.healthHandler = () async {
-      requested.add(RPPermissionType.health);
-      return RPPermissionStatus.granted;
-    };
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(healthChannel, (call) async {
+          final types = ((call.arguments as Map)['types'] as List)
+              .cast<String>();
+          switch (call.method) {
+            case 'hasPermissions':
+              return alreadyGranted;
+            case 'requestAuthorization':
+              requested.add(types);
+              return authorizationSucceeds;
+          }
+          return null;
+        });
   });
 
   tearDown(() async {
-    RPPermissions.healthHandler = null;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(healthChannel, null);
     await subscription.cancel();
   });
 
@@ -114,7 +145,7 @@ void main() {
       expect(requested, isEmpty);
 
       await tapForward(tester, 'NEXT');
-      expect(requested, [RPPermissionType.health]);
+      expect(requested, [healthTypeNames]);
     },
   );
 
@@ -153,8 +184,10 @@ void main() {
   ) async {
     final document = documentWithHealthOnFirstSection();
     // Both sections ask for health, so leaving the second one would prompt again
-    // if granted permissions were not skipped.
+    // if granted permissions were not skipped. The types have to be set too,
+    // otherwise the second section would ask for nothing regardless.
     document.sections.last.permissions = [RPPermissionType.health];
+    document.sections.last.healthDataTypes = healthTypes;
 
     await tester.pumpWidget(
       app(
@@ -169,7 +202,7 @@ void main() {
     await tapForward(tester, 'NEXT');
     await tapForward(tester, 'SEE SUMMARY');
 
-    expect(requested, [RPPermissionType.health]);
+    expect(requested, [healthTypeNames]);
   });
 
   testWidgets('without askPermission nothing is requested or recorded', (
@@ -191,6 +224,90 @@ void main() {
 
     expect(requested, isEmpty);
     expect(sentResults, isEmpty);
+  });
+
+  /// Health is not a single permission - HealthKit and Health Connect authorise
+  /// each data type on its own - so the section says which types it needs and
+  /// those are what reaches the plugin.
+  group('health data types', () {
+    Future<RPPermissionResult> runStep(
+      WidgetTester tester,
+      RPConsentDocument document,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          RPVisualConsentStep(
+            identifier: 'visualStep',
+            consentDocument: document,
+            askPermission: true,
+          ),
+        ),
+      );
+      await tapForward(tester, 'NEXT');
+      await tapForward(tester, 'SEE SUMMARY');
+      return sentResults.single as RPPermissionResult;
+    }
+
+    testWidgets('the types declared on the section are the ones requested', (
+      tester,
+    ) async {
+      final document = documentWithHealthOnFirstSection();
+      document.sections.first.healthDataTypes = const [
+        HealthDataType.HEART_RATE,
+      ];
+
+      await runStep(tester, document);
+
+      // Not the two types of the shared fixture - the ones this section names.
+      expect(requested, [
+        ['HEART_RATE'],
+      ]);
+    });
+
+    testWidgets('declaring health without any type asks for nothing', (
+      tester,
+    ) async {
+      final document = documentWithHealthOnFirstSection();
+      // RPPermissionType.health on its own says nothing about what to request,
+      // so there is no authorisation sheet to show.
+      document.sections.first.healthDataTypes = null;
+
+      final result = await runStep(tester, document);
+
+      expect(requested, isEmpty);
+      expect(result.statuses, {
+        RPPermissionType.health: RPPermissionStatus.unsupported,
+      });
+    });
+
+    testWidgets('data already authorised is not asked for again', (
+      tester,
+    ) async {
+      // The health plugin warns that requestAuthorization can block when access
+      // was already granted, so it must not be reached in this case.
+      alreadyGranted = true;
+
+      final result = await runStep(tester, documentWithHealthOnFirstSection());
+
+      expect(requested, isEmpty);
+      expect(result.statuses, {
+        RPPermissionType.health: RPPermissionStatus.granted,
+      });
+    });
+
+    testWidgets('a refused authorisation is recorded as denied', (
+      tester,
+    ) async {
+      authorizationSucceeds = false;
+
+      final result = await runStep(tester, documentWithHealthOnFirstSection());
+
+      expect(requested, [healthTypeNames]);
+      // Recorded, not blocking - the participant still reaches the end.
+      expect(result.statuses, {
+        RPPermissionType.health: RPPermissionStatus.denied,
+      });
+    });
   });
 
   /// Apple does not allow the screen which explains an upcoming permission
@@ -234,7 +351,7 @@ void main() {
       // Onto the health section, then past it - which is what shows the alert.
       await tapForward(tester, 'NEXT');
       await tapForward(tester, 'NEXT');
-      expect(requested, [RPPermissionType.health]);
+      expect(requested, [healthTypeNames]);
 
       // Coming back to it, the section is no longer about to open an alert, so
       // it behaves like any other section again.
