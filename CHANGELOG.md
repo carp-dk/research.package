@@ -1,3 +1,7 @@
+## 2.5.0
+
+* widen `carp_serializable` constraint to allow 3.x
+
 ## 2.4.1
 
 * Migrated to `carp_themes_package` 0.2.0: widgets now read colors and text
