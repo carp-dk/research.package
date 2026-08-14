@@ -36,6 +36,7 @@ class RPInstructionStep extends RPStep {
     this.audioPath,
     this.videoPath,
     super.footnote,
+    super.nextButtonText,
   });
 
   @override

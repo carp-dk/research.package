@@ -358,7 +358,8 @@ RPVisualConsentStep _$RPVisualConsentStepFromJson(Map<String, dynamic> json) =>
       ..title = json['title'] as String
       ..text = json['text'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPVisualConsentStepToJson(
   RPVisualConsentStep instance,
@@ -369,6 +370,7 @@ Map<String, dynamic> _$RPVisualConsentStepToJson(
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
   'consentDocument': instance.consentDocument.toJson(),
 };
 
@@ -384,7 +386,8 @@ RPConsentReviewStep _$RPConsentReviewStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPConsentReviewStepToJson(
   RPConsentReviewStep instance,
@@ -395,6 +398,7 @@ Map<String, dynamic> _$RPConsentReviewStepToJson(
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
   'consentDocument': instance.consentDocument.toJson(),
   'reasonForConsent': ?instance.reasonForConsent,
 };
@@ -418,6 +422,7 @@ RPStep _$RPStepFromJson(Map<String, dynamic> json) => RPStep(
   text: json['text'] as String?,
   optional: json['optional'] as bool? ?? false,
   footnote: json['footnote'] as String?,
+  nextButtonText: json['nextButtonText'] as String?,
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPStepToJson(RPStep instance) => <String, dynamic>{
@@ -427,6 +432,7 @@ Map<String, dynamic> _$RPStepToJson(RPStep instance) => <String, dynamic>{
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
 };
 
 RPFormStep _$RPFormStepFromJson(Map<String, dynamic> json) =>
@@ -447,6 +453,7 @@ RPFormStep _$RPFormStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?
       ..answerFormat = RPAnswerFormat.fromJson(
         json['answerFormat'] as Map<String, dynamic>,
       )
@@ -461,6 +468,7 @@ Map<String, dynamic> _$RPFormStepToJson(RPFormStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'answerFormat': instance.answerFormat.toJson(),
       'placeholder': ?instance.placeholder,
       'autoSkip': instance.autoSkip,
@@ -488,6 +496,7 @@ RPQuestionStep _$RPQuestionStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?
       ..placeholder = json['placeholder'] as String?;
 
 Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
@@ -498,6 +507,7 @@ Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'answerFormat': instance.answerFormat.toJson(),
       'placeholder': ?instance.placeholder,
       'autoSkip': instance.autoSkip,
@@ -507,16 +517,18 @@ Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
 
 RPInstructionStep _$RPInstructionStepFromJson(Map<String, dynamic> json) =>
     RPInstructionStep(
-      identifier: json['identifier'] as String,
-      title: json['title'] as String,
-      text: json['text'] as String?,
-      optional: json['optional'] as bool? ?? false,
-      detailText: json['detailText'] as String?,
-      imagePath: json['imagePath'] as String?,
-      audioPath: json['audioPath'] as String?,
-      videoPath: json['videoPath'] as String?,
-      footnote: json['footnote'] as String?,
-    )..$type = json['__type'] as String?;
+        identifier: json['identifier'] as String,
+        title: json['title'] as String,
+        text: json['text'] as String?,
+        optional: json['optional'] as bool? ?? false,
+        detailText: json['detailText'] as String?,
+        imagePath: json['imagePath'] as String?,
+        audioPath: json['audioPath'] as String?,
+        videoPath: json['videoPath'] as String?,
+        footnote: json['footnote'] as String?,
+      )
+      ..$type = json['__type'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPInstructionStepToJson(RPInstructionStep instance) =>
     <String, dynamic>{
@@ -526,6 +538,7 @@ Map<String, dynamic> _$RPInstructionStepToJson(RPInstructionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'detailText': ?instance.detailText,
       'imagePath': ?instance.imagePath,
       'audioPath': ?instance.audioPath,
@@ -540,7 +553,8 @@ RPCompletionStep _$RPCompletionStepFromJson(Map<String, dynamic> json) =>
         optional: json['optional'] as bool? ?? false,
       )
       ..$type = json['__type'] as String?
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPCompletionStepToJson(RPCompletionStep instance) =>
     <String, dynamic>{
@@ -550,6 +564,7 @@ Map<String, dynamic> _$RPCompletionStepToJson(RPCompletionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
     };
 
 RPActivityStep _$RPActivityStepFromJson(Map<String, dynamic> json) =>
@@ -562,7 +577,8 @@ RPActivityStep _$RPActivityStepFromJson(Map<String, dynamic> json) =>
       ..title = json['title'] as String
       ..text = json['text'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPActivityStepToJson(RPActivityStep instance) =>
     <String, dynamic>{
@@ -572,6 +588,7 @@ Map<String, dynamic> _$RPActivityStepToJson(RPActivityStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'includeInstructions': instance.includeInstructions,
       'includeResults': instance.includeResults,
     };
@@ -588,7 +605,8 @@ RPTimerStep _$RPTimerStepFromJson(Map<String, dynamic> json) =>
         footnote: json['footnote'] as String?,
       )
       ..$type = json['__type'] as String?
-      ..text = json['text'] as String?;
+      ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPTimerStepToJson(RPTimerStep instance) =>
     <String, dynamic>{
@@ -598,6 +616,7 @@ Map<String, dynamic> _$RPTimerStepToJson(RPTimerStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'timeout': instance.timeout.inMicroseconds,
       'playSound': instance.playSound,
       'autoSkip': instance.autoSkip,

@@ -1,3 +1,25 @@
+## 3.0.0
+
+* Added `RPUITask.carouselBarBuilder` for replacing the default carousel bar
+  (logo, "x of y" progress and close button) with a custom widget. Return
+  `const SizedBox.shrink()` to hide the bar entirely. When the builder is
+  given, `carouselBarImage`, `carouselBarHorizontalPadding`,
+  `carouselBarVerticalPadding` and `carouselBarBackgroundColor` are ignored.
+  Note that a replacement bar should offer its own way to cancel the task.
+* Added `RPUITask.nextButtonText` to override the label of the Next button.
+  When `null` the localized `'NEXT'` key is used as before. Applies to the whole
+  task, not to individual steps.
+* Added `RPStep.nextButtonText` so an individual step can label its own forward
+  action (e.g. "Start Practicing"). It takes precedence over
+  `RPUITask.nextButtonText`, which in turn falls back to the `'NEXT'` key.
+* The bottom navigation row now centres the Next button when there is no Back
+  button, instead of pushing it to the trailing edge.
+* Added `RPUITask.nextButtonStyle` to style the Next button. Properties set
+  there win; anything left null falls back to the previous default
+  (`CarpColors.primary` background) and then to the ambient
+  `ElevatedButtonThemeData`. The label stays white unless a `foregroundColor`
+  is given.
+
 ## 2.5.0
 
 * upgrade to `carp_serializable` ^3.0.0

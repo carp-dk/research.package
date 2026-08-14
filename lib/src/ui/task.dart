@@ -1,5 +1,18 @@
 part of '../../ui.dart';
 
+/// Signature for building a replacement for the default carousel bar shown at
+/// the top of an [RPUITask].
+///
+/// [stepIndex] is the zero-based index of the step currently on screen.
+/// [stepCount] is the number of steps in the task — for an
+/// [RPNavigableOrderedTask] not every step is necessarily shown, so it is an
+/// upper bound rather than an exact total.
+typedef RPCarouselBarBuilder = Widget Function(
+  BuildContext context,
+  int stepIndex,
+  int stepCount,
+);
+
 /// This class is the primary entry point for the presentation of the Research
 /// Package framework UI.
 /// It presents the steps of an [RPOrderedTask] (either navigable or just linear)
@@ -16,6 +29,41 @@ class RPUITask extends StatefulWidget {
   final double? carouselBarVerticalPadding;
 
   final Color? carouselBarBackgroundColor;
+
+  /// Builds a replacement for the default carousel bar at the top of the task.
+  ///
+  /// When `null` the default bar is shown — logo, "x of y" progress and a close
+  /// button — configured through [carouselBarImage],
+  /// [carouselBarHorizontalPadding], [carouselBarVerticalPadding] and
+  /// [carouselBarBackgroundColor]. Those four are ignored when a builder is
+  /// supplied, since the builder owns the whole bar.
+  ///
+  /// Return `const SizedBox.shrink()` to remove the bar entirely.
+  ///
+  /// Note that the default bar holds the only built-in way to cancel a task, so
+  /// a replacement should provide its own affordance — either
+  /// `blocTask.sendStatus(RPStepStatus.Canceled)` to cancel directly, or
+  /// [RPUITaskState.showCancelConfirmationDialog] to confirm first.
+  final RPCarouselBarBuilder? carouselBarBuilder;
+
+  /// Text for the button that advances to the next step.
+  ///
+  /// May be a localization key or a literal — anything the localizations do
+  /// not recognise is shown as-is.
+  ///
+  /// When `null` the localized `'NEXT'` key is used, falling back to `"NEXT"`.
+  /// Applies to every step; a step's own [RPStep.nextButtonText] wins over it.
+  final String? nextButtonText;
+
+  /// Style for the button that advances to the next step.
+  ///
+  /// Properties set here win. Anything left null falls back to the default —
+  /// a [CarpColors.primary] background — and then to the ambient
+  /// [ElevatedButtonThemeData], so overriding only `shape` keeps the default
+  /// colour. Pass a `backgroundColor` to change the colour too.
+  ///
+  /// The label is drawn white unless a `foregroundColor` is given here.
+  final ButtonStyle? nextButtonStyle;
 
   /// The callback function which has to return an [RPTaskResult] object.
   /// This function is called when the participant has finished the last step.
@@ -41,6 +89,9 @@ class RPUITask extends StatefulWidget {
     this.carouselBarHorizontalPadding,
     this.carouselBarVerticalPadding,
     this.carouselBarBackgroundColor,
+    this.carouselBarBuilder,
+    this.nextButtonText,
+    this.nextButtonStyle,
     this.onSubmit,
     this.onCancel,
   });
@@ -251,6 +302,18 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
     );
   }
 
+  /// Label for the Next button.
+  ///
+  /// The current step's [RPStep.nextButtonText] wins over the task-wide
+  /// [RPUITask.nextButtonText]; with neither set the `'NEXT'` key is used.
+  /// Either value may be a localization key or a literal — [translate] returns
+  /// anything it does not recognise unchanged.
+  String _nextButtonLabel(RPLocalizations? locale) {
+    final custom =
+        _currentStep?.nextButtonText ?? widget.nextButtonText ?? 'NEXT';
+    return locale?.translate(custom) ?? custom;
+  }
+
   Widget _carouselBar(RPLocalizations? locale) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -316,6 +379,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   Widget build(BuildContext context) {
     RPLocalizations? locale = RPLocalizations.of(context);
 
+    // Back is only offered part-way through a navigable task.
+    final showBackButton = _currentStepIndex != 0 && _isNavigableTask;
+
     return PopScope<bool>(
       canPop: false,
       // removed again - see issue #141
@@ -330,8 +396,13 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top bar
-              _carouselBar(locale),
+              // Top bar — a custom builder replaces the default bar entirely.
+              widget.carouselBarBuilder?.call(
+                    context,
+                    _currentStepIndex,
+                    widget.task.steps.length,
+                  ) ??
+                  _carouselBar(locale),
               // Body
               Expanded(
                 child: PageView.builder(
@@ -351,10 +422,14 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                   padding:
                       const EdgeInsets.only(left: 15, right: 15, bottom: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Without a Back button, `spaceBetween` would push a lone
+                    // Next button to the trailing edge — centre it instead.
+                    mainAxisAlignment: showBackButton
+                        ? MainAxisAlignment.spaceBetween
+                        : MainAxisAlignment.center,
                     children: [
                       // if first question or its a navigable task
-                      _currentStepIndex == 0 || !_isNavigableTask
+                      !showBackButton
                           ? Container()
                           : OutlinedButton(
                               style: OutlinedButton.styleFrom(
@@ -375,9 +450,16 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                         stream: blocQuestion.questionReadyToProceed,
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
+                            // Caller's style wins; anything it leaves null
+                            // falls back to the default background colour.
+                            final defaultNextStyle = ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.primary);
                             return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary),
+                              style:
+                                  widget.nextButtonStyle?.merge(
+                                        defaultNextStyle,
+                                      ) ??
+                                      defaultNextStyle,
                               onPressed: snapshot.data!
                                   ? () {
                                       FocusManager.instance.primaryFocus
@@ -387,10 +469,14 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                                     }
                                   : null,
                               child: Text(
-                                style: const TextStyle(color: Colors.white),
-                                RPLocalizations.of(context)
-                                        ?.translate('NEXT') ??
-                                    "NEXT",
+                                // Historically always white; defer to the
+                                // caller when they set a foreground colour.
+                                style:
+                                    widget.nextButtonStyle?.foregroundColor ==
+                                        null
+                                    ? const TextStyle(color: Colors.white)
+                                    : null,
+                                _nextButtonLabel(locale),
                               ),
                             );
                           } else {
