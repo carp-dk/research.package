@@ -29,6 +29,31 @@ class RPConsentSection extends Serializable {
   /// type UserDataCollection or PassiveDataCollection.
   List<RPDataTypeSection>? dataTypes;
 
+  /// The OS permissions which this section explains the need for.
+  ///
+  /// They are requested when the participant taps "NEXT" on this section during
+  /// a [RPVisualConsentStep] which has [RPVisualConsentStep.askPermission] set
+  /// to `true`. This way the permission dialog is shown in context, with the
+  /// [summary] and [content] of this section as the rationale — which is what
+  /// both Apple and Google ask for.
+  ///
+  /// If `null` or empty, no permissions are requested for this section.
+  List<RPPermissionType>? permissions;
+
+  /// The health data types this section explains the need for.
+  ///
+  /// Health data is not a single permission — Apple HealthKit and Android
+  /// Health Connect authorise each data type separately — so listing
+  /// [RPPermissionType.health] in [permissions] is not enough on its own. This
+  /// is the list which is actually asked for, and it also documents in the
+  /// consent document itself which health data the study reads.
+  ///
+  /// Read access is requested for every type listed. Ignored unless
+  /// [permissions] contains [RPPermissionType.health]; conversely, that
+  /// permission resolves to [RPPermissionStatus.unsupported] if this is `null`
+  /// or empty, since there would be nothing to ask for.
+  List<HealthDataType>? healthDataTypes;
+
   /// A custom illustration (an [Image] or [Icon] to show for Custom [RPConsentSectionType]
   @JsonKey(includeFromJson: false, includeToJson: false)
   Widget? customIllustration;
@@ -44,6 +69,8 @@ class RPConsentSection extends Serializable {
       required this.summary,
       this.content,
       this.dataTypes,
+      this.permissions,
+      this.healthDataTypes,
       this.customIllustration}) {
     assert(type != RPConsentSectionType.Custom || title != null,
         "If a you are creating a Custom ConsentSection, then a title must be provided.");

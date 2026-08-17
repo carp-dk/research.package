@@ -1,5 +1,87 @@
 part of '../../ui.dart';
 
+/// Signature for building a replacement for the default carousel bar shown at
+/// the top of an [RPUITask].
+///
+/// [stepIndex] is the zero-based index of the step currently on screen.
+/// [stepCount] is the number of steps in the task — for an
+/// [RPNavigableOrderedTask] not every step is necessarily shown, so it is an
+/// upper bound rather than an exact total.
+typedef RPCarouselBarBuilder = Widget Function(
+  BuildContext context,
+  int stepIndex,
+  int stepCount,
+);
+
+/// Signature for building a replacement for the default bottom navigation shown
+/// at the bottom of an [RPUITask].
+///
+/// [navigation] carries the actions of the task — advancing, going back and
+/// cancelling — so a custom bar drives the task the same way the default one
+/// does. See [RPTaskNavigation].
+typedef RPBottomNavigationBuilder = Widget Function(
+  BuildContext context,
+  RPTaskNavigation navigation,
+);
+
+/// The navigation of an [RPUITask], handed to an [RPBottomNavigationBuilder].
+///
+/// It exposes what the default bottom bar does — advance, go back, cancel —
+/// together with the state those actions depend on, so that a custom bar can be
+/// built without reaching into the task's internals.
+class RPTaskNavigation {
+  /// Advances to the next step, or `null` while the current step is not ready
+  /// to be left — an unanswered question, typically.
+  ///
+  /// Passing it straight to a button's `onPressed` therefore disables the
+  /// button until the step is answered.
+  final VoidCallback? onNext;
+
+  /// Returns to the previous step, or `null` on the first step of the task,
+  /// where there is nothing to go back to.
+  ///
+  /// Note that the default bar is stricter than this: it only offers BACK in an
+  /// [RPNavigableOrderedTask]. A custom bar may offer it in a linear task too.
+  final VoidCallback? onBack;
+
+  /// Cancels the task, after asking the participant to confirm in a dialog.
+  ///
+  /// This is what the close button of the default carousel bar does. To end the
+  /// task without confirmation, call [RPUITask.onCancel] directly and pop the
+  /// route.
+  final VoidCallback onCancel;
+
+  /// Whether the current step is ready to be left, i.e. whether [onNext] is
+  /// non-null.
+  final bool canProceed;
+
+  /// The step currently on screen.
+  ///
+  /// The default bar draws nothing on an [RPCompletionStep],
+  /// [RPVisualConsentStep] or [RPConsentReviewStep], since those steps carry
+  /// their own buttons. A custom bar is built on every step instead, and can
+  /// use this to make the same choice.
+  final RPStep? currentStep;
+
+  /// The zero-based index of [currentStep].
+  final int stepIndex;
+
+  /// The number of steps in the task — for an [RPNavigableOrderedTask] not
+  /// every step is necessarily shown, so it is an upper bound rather than an
+  /// exact total.
+  final int stepCount;
+
+  const RPTaskNavigation({
+    required this.onNext,
+    required this.onBack,
+    required this.onCancel,
+    required this.canProceed,
+    required this.currentStep,
+    required this.stepIndex,
+    required this.stepCount,
+  });
+}
+
 /// This class is the primary entry point for the presentation of the Research
 /// Package framework UI.
 /// It presents the steps of an [RPOrderedTask] (either navigable or just linear)
@@ -16,6 +98,56 @@ class RPUITask extends StatefulWidget {
   final double? carouselBarVerticalPadding;
 
   final Color? carouselBarBackgroundColor;
+
+  /// Builds a replacement for the default carousel bar at the top of the task.
+  ///
+  /// When `null` the default bar is shown — logo, "x of y" progress and a close
+  /// button — configured through [carouselBarImage],
+  /// [carouselBarHorizontalPadding], [carouselBarVerticalPadding] and
+  /// [carouselBarBackgroundColor]. Those four are ignored when a builder is
+  /// supplied, since the builder owns the whole bar.
+  ///
+  /// Return `const SizedBox.shrink()` to remove the bar entirely.
+  ///
+  /// Note that the default bar holds the only built-in way to cancel a task, so
+  /// a replacement should provide its own affordance — either
+  /// `blocTask.sendStatus(RPStepStatus.Canceled)` to cancel directly, or
+  /// [RPUITaskState.showCancelConfirmationDialog] to confirm first.
+  final RPCarouselBarBuilder? carouselBarBuilder;
+
+  /// Builds a replacement for the default bottom navigation of the task.
+  ///
+  /// When `null` the default row is shown — a BACK button in a navigable task
+  /// and a NEXT button, configured through [nextButtonText] and
+  /// [nextButtonStyle]. Those two are ignored when a builder is supplied, since
+  /// the builder owns the whole row.
+  ///
+  /// Return `const SizedBox.shrink()` to remove the row entirely.
+  ///
+  /// The default row hides itself on the steps which carry their own buttons
+  /// ([RPCompletionStep], [RPVisualConsentStep] and [RPConsentReviewStep]); the
+  /// builder is called on every step instead, with
+  /// [RPTaskNavigation.currentStep] telling it which one is on screen.
+  final RPBottomNavigationBuilder? bottomNavigationBuilder;
+
+  /// Text for the button that advances to the next step.
+  ///
+  /// May be a localization key or a literal — anything the localizations do
+  /// not recognise is shown as-is.
+  ///
+  /// When `null` the localized `'NEXT'` key is used, falling back to `"NEXT"`.
+  /// Applies to every step; a step's own [RPStep.nextButtonText] wins over it.
+  final String? nextButtonText;
+
+  /// Style for the button that advances to the next step.
+  ///
+  /// Properties set here win. Anything left null falls back to the default —
+  /// a [CarpColors.primary] background — and then to the ambient
+  /// [ElevatedButtonThemeData], so overriding only `shape` keeps the default
+  /// colour. Pass a `backgroundColor` to change the colour too.
+  ///
+  /// The label is drawn white unless a `foregroundColor` is given here.
+  final ButtonStyle? nextButtonStyle;
 
   /// The callback function which has to return an [RPTaskResult] object.
   /// This function is called when the participant has finished the last step.
@@ -41,6 +173,10 @@ class RPUITask extends StatefulWidget {
     this.carouselBarHorizontalPadding,
     this.carouselBarVerticalPadding,
     this.carouselBarBackgroundColor,
+    this.carouselBarBuilder,
+    this.bottomNavigationBuilder,
+    this.nextButtonText,
+    this.nextButtonStyle,
     this.onSubmit,
     this.onCancel,
   });
@@ -251,6 +387,39 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
     );
   }
 
+  /// Label for the Next button.
+  ///
+  /// The current step's [RPStep.nextButtonText] wins over the task-wide
+  /// [RPUITask.nextButtonText]; with neither set the `'NEXT'` key is used.
+  /// Either value may be a localization key or a literal — [translate] returns
+  /// anything it does not recognise unchanged.
+  String _nextButtonLabel(RPLocalizations? locale) {
+    final custom =
+        _currentStep?.nextButtonText ?? widget.nextButtonText ?? 'NEXT';
+    return locale?.translate(custom) ?? custom;
+  }
+
+  /// The navigation handed to [RPUITask.bottomNavigationBuilder]. [canProceed]
+  /// comes from the same stream the default Next button listens to.
+  RPTaskNavigation _navigation(bool canProceed) => RPTaskNavigation(
+        onNext: canProceed
+            ? () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                blocTask.sendStatus(RPStepStatus.Finished);
+              }
+            : null,
+        // Offered whenever there is a step to go back to, unlike the default
+        // bar, which offers BACK in navigable tasks only.
+        onBack: _activeSteps.length > 1
+            ? () => blocTask.sendStatus(RPStepStatus.Back)
+            : null,
+        onCancel: () => blocTask.sendStatus(RPStepStatus.Canceled),
+        canProceed: canProceed,
+        currentStep: _currentStep,
+        stepIndex: _currentStepIndex,
+        stepCount: widget.task.steps.length,
+      );
+
   Widget _carouselBar(RPLocalizations? locale) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -290,21 +459,27 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                     )
                   : Container(),
             ),
-            // Close button
+            // Close button. A consent flow has none - a screen explaining an
+            // upcoming permission request may offer no way out but the system
+            // alert (Apple HIG, Privacy) - and is left with DISAGREE instead.
+            // The empty slot keeps the carousel indicator in place.
             Expanded(
               flex: 5,
-              child: IconButton(
-                padding: const EdgeInsets.only(right: 30),
-                alignment: Alignment.centerRight,
-                icon: Icon(
-                  Icons.highlight_off,
-                  color: ((CupertinoTheme.of(context).primaryColor ==
-                          CupertinoColors.activeBlue)
-                      ? Theme.of(context).primaryColor
-                      : CupertinoTheme.of(context).primaryColor),
-                ),
-                onPressed: () => blocTask.sendStatus(RPStepStatus.Canceled),
-              ),
+              child: widget.task.isConsentTask
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      padding: const EdgeInsets.only(right: 30),
+                      alignment: Alignment.centerRight,
+                      icon: Icon(
+                        Icons.highlight_off,
+                        color: ((CupertinoTheme.of(context).primaryColor ==
+                                CupertinoColors.activeBlue)
+                            ? Theme.of(context).primaryColor
+                            : CupertinoTheme.of(context).primaryColor),
+                      ),
+                      onPressed: () =>
+                          blocTask.sendStatus(RPStepStatus.Canceled),
+                    ),
             ),
           ],
         ),
@@ -315,6 +490,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   @override
   Widget build(BuildContext context) {
     RPLocalizations? locale = RPLocalizations.of(context);
+
+    // Back is only offered part-way through a navigable task.
+    final showBackButton = _currentStepIndex != 0 && _isNavigableTask;
 
     return PopScope<bool>(
       canPop: false,
@@ -330,8 +508,13 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top bar
-              _carouselBar(locale),
+              // Top bar — a custom builder replaces the default bar entirely.
+              widget.carouselBarBuilder?.call(
+                    context,
+                    _currentStepIndex,
+                    widget.task.steps.length,
+                  ) ??
+                  _carouselBar(locale),
               // Body
               Expanded(
                 child: PageView.builder(
@@ -343,18 +526,30 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                 ),
               ),
 
-              // Bottom navigation
-              if (!(_currentStep is RPCompletionStep ||
+              // Bottom navigation — a custom builder replaces the default row
+              // and is built on every step, including the ones it hides on.
+              if (widget.bottomNavigationBuilder != null)
+                StreamBuilder<bool>(
+                  stream: blocQuestion.questionReadyToProceed,
+                  builder: (context, snapshot) =>
+                      widget.bottomNavigationBuilder!(
+                    context,
+                    _navigation(snapshot.data ?? false),
+                  ),
+                )
+              else if (!(_currentStep is RPCompletionStep ||
                   _currentStep is RPVisualConsentStep ||
                   _currentStep is RPConsentReviewStep))
                 Padding(
                   padding:
                       const EdgeInsets.only(left: 15, right: 15, bottom: 10),
                   child: Row(
+                    // Without a Back button, `spaceBetween` would push a lone
+                    // Next button to the trailing edge — centre it instead.
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // if first question or its a navigable task
-                      _currentStepIndex == 0 || !_isNavigableTask
+                      !showBackButton
                           ? Container()
                           : OutlinedButton(
                               style: OutlinedButton.styleFrom(
@@ -375,9 +570,16 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                         stream: blocQuestion.questionReadyToProceed,
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
+                            // Caller's style wins; anything it leaves null
+                            // falls back to the default background colour.
+                            final defaultNextStyle = ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.primary);
                             return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary),
+                              style:
+                                  widget.nextButtonStyle?.merge(
+                                        defaultNextStyle,
+                                      ) ??
+                                      defaultNextStyle,
                               onPressed: snapshot.data!
                                   ? () {
                                       FocusManager.instance.primaryFocus
@@ -387,10 +589,14 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                                     }
                                   : null,
                               child: Text(
-                                style: const TextStyle(color: Colors.white),
-                                RPLocalizations.of(context)
-                                        ?.translate('NEXT') ??
-                                    "NEXT",
+                                // Historically always white; defer to the
+                                // caller when they set a foreground colour.
+                                style:
+                                    widget.nextButtonStyle?.foregroundColor ==
+                                        null
+                                    ? const TextStyle(color: Colors.white)
+                                    : null,
+                                _nextButtonLabel(locale),
                               ),
                             );
                           } else {

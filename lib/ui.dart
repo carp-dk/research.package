@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,14 @@ import 'package:flutter/services.dart';
 import 'package:signature/signature.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:video_player/video_player.dart';
+import 'package:carp_themes_package/carp_themes_package.dart';
+// For the CLDR plural rules used when translating with a `count`.
+import 'package:intl/intl.dart';
+// Prefixed and `show`n, to keep `Permission`, `PermissionStatus` and the rest
+// out of the namespace shared by every part file of this library.
+import 'package:permission_handler/permission_handler.dart' as ph;
+// Health data is not covered by permission_handler.
+import 'package:health/health.dart' show Health, HealthDataType;
 
 import 'model.dart';
 
@@ -32,6 +41,7 @@ part 'src/ui/questions/integer_question_body.dart';
 part 'src/ui/questions/double_question_body.dart';
 part 'src/ui/questions/slider_question_body.dart';
 part 'src/ui/questions/text_input_question_body.dart';
+part 'src/ui/permissions.dart';
 part 'src/ui/completion_step.dart';
 part 'src/ui/consent_review_step.dart';
 part 'src/ui/form_step.dart';

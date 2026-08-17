@@ -4,6 +4,8 @@ import 'model.dart';
 
 export 'model.dart';
 export 'ui.dart';
+// So that declaring [RPConsentSection.healthDataTypes] needs no health import.
+export 'package:health/health.dart' show HealthDataType;
 
 /// Start class for this research_package library. Use as a singleton by
 /// `ResearchPackage()`.

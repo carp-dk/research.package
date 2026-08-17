@@ -78,6 +78,7 @@ void registerFromJsonFunctions() {
         consentDocument: RPConsentDocument(title: '', sections: [])),
     RPActivityResult(identifier: ''),
     RPNoResult(identifier: ''),
+    RPPermissionResult(identifier: ''),
     RPTaskResult(identifier: ''),
   ]);
 }

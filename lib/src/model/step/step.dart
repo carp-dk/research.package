@@ -39,6 +39,16 @@ class RPStep extends Serializable {
   /// This text will be displayed in a smaller font size.
   String? footnote;
 
+  /// Text for the button that advances past this step.
+  ///
+  /// May be a localization key or a literal — anything the localizations do
+  /// not recognise is shown as-is.
+  ///
+  /// When `null` the task-wide `RPUITask.nextButtonText` is used, which in turn
+  /// falls back to the localized `'NEXT'` key. Set this for steps whose forward
+  /// action reads better as something specific, e.g. "Start Practicing".
+  String? nextButtonText;
+
   /// Create a [RPStep] object with a unique [identifier], a [title], and
   /// a [text] to be displayed.
   RPStep({
@@ -47,6 +57,7 @@ class RPStep extends Serializable {
     this.text,
     this.optional = false,
     this.footnote,
+    this.nextButtonText,
   });
 
   /// The widget (UI representation) of the step.

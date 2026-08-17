@@ -136,6 +136,30 @@ void main() {
       expect(overviewSection.content, "Overview content");
     });
 
+    test('RPConsentSection with health data types survives a round trip', () {
+      // Serialized through a generated enum map of the health package's 100+
+      // types, so a regeneration missing them would silently drop them.
+      final section = RPConsentSection(
+        type: RPConsentSectionType.Health,
+        summary: 'Why we read your health data',
+        permissions: [RPPermissionType.health],
+        healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+      );
+
+      final restored = RPConsentSection.fromJson(
+          json.decode(toJsonString(section)) as Map<String, dynamic>);
+
+      expect(restored.healthDataTypes,
+          [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP]);
+      expect(restored.permissions, [RPPermissionType.health]);
+    });
+
+    test('a section without health data types omits them entirely', () {
+      // Consent documents written before this field existed have to serialize
+      // byte-identically, so the key may not appear when it is not set.
+      expect(toJsonString(overviewSection), isNot(contains('healthDataTypes')));
+    });
+
     test('JSON -> RPConsentDocument, assert document title', () {
       final consentDocumentJson = toJsonString(consentDocument);
 
@@ -160,6 +184,71 @@ void main() {
       expect(signature_2.identifier, 'signatureID');
 
       print(toJsonString(signature_2));
+    });
+  });
+
+  // CARP delivers study configurations as JSON. A permission field which does
+  // not survive a round trip stops a deployed study from asking, silently.
+  group('Permissions', () {
+    test('RPConsentSection with permissions -> JSON -> RPConsentSection', () {
+      RPConsentSection section = RPConsentSection(
+          type: RPConsentSectionType.Location,
+          summary: "Why we need your location",
+          permissions: [
+            RPPermissionType.location,
+            RPPermissionType.activityRecognition
+          ]);
+
+      RPConsentSection section_2 = RPConsentSection.fromJson(
+          json.decode(toJsonString(section)) as Map<String, dynamic>);
+
+      expect(section_2.permissions, section.permissions);
+      print(toJsonString(section_2));
+    });
+
+    test('RPConsentSection without permissions omits the field', () {
+      // A consent flow which does not ask for permissions must serialize exactly
+      // as it did before this feature existed.
+      expect(toJsonString(overviewSection).contains('permissions'), isFalse);
+    });
+
+    test('RPVisualConsentStep -> JSON -> RPVisualConsentStep, askPermission',
+        () {
+      RPVisualConsentStep step = RPVisualConsentStep(
+          identifier: 'visualStepID',
+          consentDocument: consentDocument,
+          askPermission: true);
+
+      RPVisualConsentStep step_2 = RPVisualConsentStep.fromJson(
+          json.decode(toJsonString(step)) as Map<String, dynamic>);
+
+      expect(step_2.askPermission, isTrue);
+      // The default has to stay opt-out, so an existing configuration which
+      // knows nothing about permissions never starts asking for them.
+      expect(
+          RPVisualConsentStep(
+                  identifier: 'visualStepID', consentDocument: consentDocument)
+              .askPermission,
+          isFalse);
+      print(toJsonString(step_2));
+    });
+
+    test('RPPermissionResult -> JSON -> RPPermissionResult', () {
+      RPPermissionResult result =
+          RPPermissionResult(identifier: 'visualStepID')
+            ..setStatus(RPPermissionType.location, RPPermissionStatus.granted)
+            ..setStatus(RPPermissionType.health, RPPermissionStatus.denied);
+
+      // Deserialized through the base class, like a stored task result is.
+      final result_2 = RPResult.fromJson(
+          json.decode(toJsonString(result)) as Map<String, dynamic>);
+
+      expect(result_2, isA<RPPermissionResult>());
+      expect((result_2 as RPPermissionResult).statuses, {
+        RPPermissionType.location: RPPermissionStatus.granted,
+        RPPermissionType.health: RPPermissionStatus.denied,
+      });
+      print(toJsonString(result_2));
     });
   });
 

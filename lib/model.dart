@@ -12,6 +12,9 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
+// `show`n, to keep the ~100 other names it exports out of the namespace shared
+// by every part file of this library.
+import 'package:health/health.dart' show HealthDataType;
 import 'package:research_package/ui.dart';
 
 // JSON
@@ -35,6 +38,9 @@ part 'src/model/consent/consent_signature.dart';
 part 'src/model/consent/visual_consent_step.dart';
 part 'src/model/consent/consent_review_step.dart';
 part 'src/model/consent/data_type_section.dart';
+
+part 'src/model/permission/permission_type.dart';
+part 'src/model/permission/permission_result.dart';
 
 part 'src/model/step/step.dart';
 part 'src/model/step/form_step.dart';

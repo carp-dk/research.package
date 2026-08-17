@@ -63,9 +63,16 @@ void main() {
       RPOrderedTask survey = RPOrderedTask.fromJson(
           json.decode(surveyJson) as Map<String, dynamic>);
 
-      expect(survey.steps.length, linearSurveyTask.steps.length);
-      expect(survey.steps.first.identifier,
-          linearSurveyTask.steps.first.identifier);
+      // Asserted against the file, not [linearSurveyTask]: the example app
+      // comments steps in and out of its demo survey. The file is also the
+      // richer artifact, still covering timer, form and question steps.
+      expect(survey.identifier, 'surveyTaskID');
+      expect(survey.steps.length, 9);
+      expect(survey.steps.first.identifier, 'instructionID');
+      expect(
+          survey.steps.map((step) => step.runtimeType.toString()).toSet(),
+          containsAll(
+              ['RPInstructionStep', 'RPTimerStep', 'RPFormStep', 'RPQuestionStep']));
       print(toJsonString(survey));
     });
   });

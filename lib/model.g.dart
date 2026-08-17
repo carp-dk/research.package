@@ -294,6 +294,12 @@ RPConsentSection _$RPConsentSectionFromJson(Map<String, dynamic> json) =>
       dataTypes: (json['dataTypes'] as List<dynamic>?)
           ?.map((e) => RPDataTypeSection.fromJson(e as Map<String, dynamic>))
           .toList(),
+      permissions: (json['permissions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$RPPermissionTypeEnumMap, e))
+          .toList(),
+      healthDataTypes: (json['healthDataTypes'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$HealthDataTypeEnumMap, e))
+          .toList(),
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPConsentSectionToJson(RPConsentSection instance) =>
@@ -304,6 +310,12 @@ Map<String, dynamic> _$RPConsentSectionToJson(RPConsentSection instance) =>
       'summary': instance.summary,
       'content': ?instance.content,
       'dataTypes': ?instance.dataTypes?.map((e) => e.toJson()).toList(),
+      'permissions': ?instance.permissions
+          ?.map((e) => _$RPPermissionTypeEnumMap[e]!)
+          .toList(),
+      'healthDataTypes': ?instance.healthDataTypes
+          ?.map((e) => _$HealthDataTypeEnumMap[e]!)
+          .toList(),
     };
 
 const _$RPConsentSectionTypeEnumMap = {
@@ -330,6 +342,132 @@ const _$RPConsentSectionTypeEnumMap = {
   RPConsentSectionType.Custom: 'Custom',
 };
 
+const _$RPPermissionTypeEnumMap = {
+  RPPermissionType.location: 'location',
+  RPPermissionType.locationAlways: 'locationAlways',
+  RPPermissionType.microphone: 'microphone',
+  RPPermissionType.camera: 'camera',
+  RPPermissionType.notification: 'notification',
+  RPPermissionType.activityRecognition: 'activityRecognition',
+  RPPermissionType.sensors: 'sensors',
+  RPPermissionType.bluetooth: 'bluetooth',
+  RPPermissionType.health: 'health',
+};
+
+const _$HealthDataTypeEnumMap = {
+  HealthDataType.ACTIVE_ENERGY_BURNED: 'ACTIVE_ENERGY_BURNED',
+  HealthDataType.ATRIAL_FIBRILLATION_BURDEN: 'ATRIAL_FIBRILLATION_BURDEN',
+  HealthDataType.APPLE_STAND_HOUR: 'APPLE_STAND_HOUR',
+  HealthDataType.APPLE_MOVE_TIME: 'APPLE_MOVE_TIME',
+  HealthDataType.APPLE_STAND_TIME: 'APPLE_STAND_TIME',
+  HealthDataType.AUDIOGRAM: 'AUDIOGRAM',
+  HealthDataType.BASAL_ENERGY_BURNED: 'BASAL_ENERGY_BURNED',
+  HealthDataType.BLOOD_GLUCOSE: 'BLOOD_GLUCOSE',
+  HealthDataType.BLOOD_OXYGEN: 'BLOOD_OXYGEN',
+  HealthDataType.BLOOD_PRESSURE_DIASTOLIC: 'BLOOD_PRESSURE_DIASTOLIC',
+  HealthDataType.BLOOD_PRESSURE_SYSTOLIC: 'BLOOD_PRESSURE_SYSTOLIC',
+  HealthDataType.BODY_FAT_PERCENTAGE: 'BODY_FAT_PERCENTAGE',
+  HealthDataType.LEAN_BODY_MASS: 'LEAN_BODY_MASS',
+  HealthDataType.BODY_MASS_INDEX: 'BODY_MASS_INDEX',
+  HealthDataType.BODY_TEMPERATURE: 'BODY_TEMPERATURE',
+  HealthDataType.BODY_WATER_MASS: 'BODY_WATER_MASS',
+  HealthDataType.DIETARY_CARBS_CONSUMED: 'DIETARY_CARBS_CONSUMED',
+  HealthDataType.DIETARY_CAFFEINE: 'DIETARY_CAFFEINE',
+  HealthDataType.DIETARY_ENERGY_CONSUMED: 'DIETARY_ENERGY_CONSUMED',
+  HealthDataType.DIETARY_FATS_CONSUMED: 'DIETARY_FATS_CONSUMED',
+  HealthDataType.DIETARY_PROTEIN_CONSUMED: 'DIETARY_PROTEIN_CONSUMED',
+  HealthDataType.DIETARY_FIBER: 'DIETARY_FIBER',
+  HealthDataType.DIETARY_SUGAR: 'DIETARY_SUGAR',
+  HealthDataType.DIETARY_FAT_MONOUNSATURATED: 'DIETARY_FAT_MONOUNSATURATED',
+  HealthDataType.DIETARY_FAT_POLYUNSATURATED: 'DIETARY_FAT_POLYUNSATURATED',
+  HealthDataType.DIETARY_FAT_SATURATED: 'DIETARY_FAT_SATURATED',
+  HealthDataType.DIETARY_CHOLESTEROL: 'DIETARY_CHOLESTEROL',
+  HealthDataType.DIETARY_VITAMIN_A: 'DIETARY_VITAMIN_A',
+  HealthDataType.DIETARY_THIAMIN: 'DIETARY_THIAMIN',
+  HealthDataType.DIETARY_RIBOFLAVIN: 'DIETARY_RIBOFLAVIN',
+  HealthDataType.DIETARY_NIACIN: 'DIETARY_NIACIN',
+  HealthDataType.DIETARY_PANTOTHENIC_ACID: 'DIETARY_PANTOTHENIC_ACID',
+  HealthDataType.DIETARY_VITAMIN_B6: 'DIETARY_VITAMIN_B6',
+  HealthDataType.DIETARY_BIOTIN: 'DIETARY_BIOTIN',
+  HealthDataType.DIETARY_VITAMIN_B12: 'DIETARY_VITAMIN_B12',
+  HealthDataType.DIETARY_VITAMIN_C: 'DIETARY_VITAMIN_C',
+  HealthDataType.DIETARY_VITAMIN_D: 'DIETARY_VITAMIN_D',
+  HealthDataType.DIETARY_VITAMIN_E: 'DIETARY_VITAMIN_E',
+  HealthDataType.DIETARY_VITAMIN_K: 'DIETARY_VITAMIN_K',
+  HealthDataType.DIETARY_FOLATE: 'DIETARY_FOLATE',
+  HealthDataType.DIETARY_CALCIUM: 'DIETARY_CALCIUM',
+  HealthDataType.DIETARY_CHLORIDE: 'DIETARY_CHLORIDE',
+  HealthDataType.DIETARY_IRON: 'DIETARY_IRON',
+  HealthDataType.DIETARY_MAGNESIUM: 'DIETARY_MAGNESIUM',
+  HealthDataType.DIETARY_PHOSPHORUS: 'DIETARY_PHOSPHORUS',
+  HealthDataType.DIETARY_POTASSIUM: 'DIETARY_POTASSIUM',
+  HealthDataType.DIETARY_SODIUM: 'DIETARY_SODIUM',
+  HealthDataType.DIETARY_ZINC: 'DIETARY_ZINC',
+  HealthDataType.DIETARY_CHROMIUM: 'DIETARY_CHROMIUM',
+  HealthDataType.DIETARY_COPPER: 'DIETARY_COPPER',
+  HealthDataType.DIETARY_IODINE: 'DIETARY_IODINE',
+  HealthDataType.DIETARY_MANGANESE: 'DIETARY_MANGANESE',
+  HealthDataType.DIETARY_MOLYBDENUM: 'DIETARY_MOLYBDENUM',
+  HealthDataType.DIETARY_SELENIUM: 'DIETARY_SELENIUM',
+  HealthDataType.FORCED_EXPIRATORY_VOLUME: 'FORCED_EXPIRATORY_VOLUME',
+  HealthDataType.HEART_RATE: 'HEART_RATE',
+  HealthDataType.HEART_RATE_VARIABILITY_SDNN: 'HEART_RATE_VARIABILITY_SDNN',
+  HealthDataType.HEART_RATE_VARIABILITY_RMSSD: 'HEART_RATE_VARIABILITY_RMSSD',
+  HealthDataType.HEIGHT: 'HEIGHT',
+  HealthDataType.INSULIN_DELIVERY: 'INSULIN_DELIVERY',
+  HealthDataType.RESTING_HEART_RATE: 'RESTING_HEART_RATE',
+  HealthDataType.RESPIRATORY_RATE: 'RESPIRATORY_RATE',
+  HealthDataType.PERIPHERAL_PERFUSION_INDEX: 'PERIPHERAL_PERFUSION_INDEX',
+  HealthDataType.STEPS: 'STEPS',
+  HealthDataType.WAIST_CIRCUMFERENCE: 'WAIST_CIRCUMFERENCE',
+  HealthDataType.WALKING_HEART_RATE: 'WALKING_HEART_RATE',
+  HealthDataType.WEIGHT: 'WEIGHT',
+  HealthDataType.DISTANCE_WALKING_RUNNING: 'DISTANCE_WALKING_RUNNING',
+  HealthDataType.DISTANCE_SWIMMING: 'DISTANCE_SWIMMING',
+  HealthDataType.DISTANCE_CYCLING: 'DISTANCE_CYCLING',
+  HealthDataType.FLIGHTS_CLIMBED: 'FLIGHTS_CLIMBED',
+  HealthDataType.DISTANCE_DELTA: 'DISTANCE_DELTA',
+  HealthDataType.WALKING_SPEED: 'WALKING_SPEED',
+  HealthDataType.SPEED: 'SPEED',
+  HealthDataType.MINDFULNESS: 'MINDFULNESS',
+  HealthDataType.WATER: 'WATER',
+  HealthDataType.SLEEP_ASLEEP: 'SLEEP_ASLEEP',
+  HealthDataType.SLEEP_AWAKE_IN_BED: 'SLEEP_AWAKE_IN_BED',
+  HealthDataType.SLEEP_AWAKE: 'SLEEP_AWAKE',
+  HealthDataType.SLEEP_DEEP: 'SLEEP_DEEP',
+  HealthDataType.SLEEP_IN_BED: 'SLEEP_IN_BED',
+  HealthDataType.SLEEP_LIGHT: 'SLEEP_LIGHT',
+  HealthDataType.SLEEP_OUT_OF_BED: 'SLEEP_OUT_OF_BED',
+  HealthDataType.SLEEP_REM: 'SLEEP_REM',
+  HealthDataType.SLEEP_SESSION: 'SLEEP_SESSION',
+  HealthDataType.SLEEP_UNKNOWN: 'SLEEP_UNKNOWN',
+  HealthDataType.EXERCISE_TIME: 'EXERCISE_TIME',
+  HealthDataType.WORKOUT: 'WORKOUT',
+  HealthDataType.WORKOUT_ROUTE: 'WORKOUT_ROUTE',
+  HealthDataType.HEADACHE_NOT_PRESENT: 'HEADACHE_NOT_PRESENT',
+  HealthDataType.HEADACHE_MILD: 'HEADACHE_MILD',
+  HealthDataType.HEADACHE_MODERATE: 'HEADACHE_MODERATE',
+  HealthDataType.HEADACHE_SEVERE: 'HEADACHE_SEVERE',
+  HealthDataType.HEADACHE_UNSPECIFIED: 'HEADACHE_UNSPECIFIED',
+  HealthDataType.NUTRITION: 'NUTRITION',
+  HealthDataType.UV_INDEX: 'UV_INDEX',
+  HealthDataType.GENDER: 'GENDER',
+  HealthDataType.BIRTH_DATE: 'BIRTH_DATE',
+  HealthDataType.BLOOD_TYPE: 'BLOOD_TYPE',
+  HealthDataType.MENSTRUATION_FLOW: 'MENSTRUATION_FLOW',
+  HealthDataType.WATER_TEMPERATURE: 'WATER_TEMPERATURE',
+  HealthDataType.UNDERWATER_DEPTH: 'UNDERWATER_DEPTH',
+  HealthDataType.SLEEP_WRIST_TEMPERATURE: 'SLEEP_WRIST_TEMPERATURE',
+  HealthDataType.HIGH_HEART_RATE_EVENT: 'HIGH_HEART_RATE_EVENT',
+  HealthDataType.LOW_HEART_RATE_EVENT: 'LOW_HEART_RATE_EVENT',
+  HealthDataType.IRREGULAR_HEART_RATE_EVENT: 'IRREGULAR_HEART_RATE_EVENT',
+  HealthDataType.ELECTRODERMAL_ACTIVITY: 'ELECTRODERMAL_ACTIVITY',
+  HealthDataType.ELECTROCARDIOGRAM: 'ELECTROCARDIOGRAM',
+  HealthDataType.TOTAL_CALORIES_BURNED: 'TOTAL_CALORIES_BURNED',
+  HealthDataType.ACTIVITY_INTENSITY: 'ACTIVITY_INTENSITY',
+  HealthDataType.SKIN_TEMPERATURE: 'SKIN_TEMPERATURE',
+};
+
 RPConsentSignature _$RPConsentSignatureFromJson(Map<String, dynamic> json) =>
     RPConsentSignature(
       identifier: json['identifier'] as String,
@@ -353,12 +491,14 @@ RPVisualConsentStep _$RPVisualConsentStepFromJson(Map<String, dynamic> json) =>
         consentDocument: RPConsentDocument.fromJson(
           json['consentDocument'] as Map<String, dynamic>,
         ),
+        askPermission: json['askPermission'] as bool? ?? false,
       )
       ..$type = json['__type'] as String?
       ..title = json['title'] as String
       ..text = json['text'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPVisualConsentStepToJson(
   RPVisualConsentStep instance,
@@ -369,7 +509,9 @@ Map<String, dynamic> _$RPVisualConsentStepToJson(
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
   'consentDocument': instance.consentDocument.toJson(),
+  'askPermission': instance.askPermission,
 };
 
 RPConsentReviewStep _$RPConsentReviewStepFromJson(Map<String, dynamic> json) =>
@@ -384,7 +526,8 @@ RPConsentReviewStep _$RPConsentReviewStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPConsentReviewStepToJson(
   RPConsentReviewStep instance,
@@ -395,6 +538,7 @@ Map<String, dynamic> _$RPConsentReviewStepToJson(
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
   'consentDocument': instance.consentDocument.toJson(),
   'reasonForConsent': ?instance.reasonForConsent,
 };
@@ -412,12 +556,54 @@ Map<String, dynamic> _$RPDataTypeSectionToJson(RPDataTypeSection instance) =>
       'dataInformation': instance.dataInformation,
     };
 
+RPPermissionResult _$RPPermissionResultFromJson(Map<String, dynamic> json) =>
+    RPPermissionResult(
+        identifier: json['identifier'] as String,
+        statuses: (json['statuses'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(
+            $enumDecode(_$RPPermissionTypeEnumMap, k),
+            $enumDecode(_$RPPermissionStatusEnumMap, e),
+          ),
+        ),
+      )
+      ..$type = json['__type'] as String?
+      ..startDate = json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String)
+      ..endDate = json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String);
+
+Map<String, dynamic> _$RPPermissionResultToJson(RPPermissionResult instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'identifier': instance.identifier,
+      'startDate': ?instance.startDate?.toIso8601String(),
+      'endDate': ?instance.endDate?.toIso8601String(),
+      'statuses': instance.statuses.map(
+        (k, e) => MapEntry(
+          _$RPPermissionTypeEnumMap[k]!,
+          _$RPPermissionStatusEnumMap[e]!,
+        ),
+      ),
+    };
+
+const _$RPPermissionStatusEnumMap = {
+  RPPermissionStatus.granted: 'granted',
+  RPPermissionStatus.denied: 'denied',
+  RPPermissionStatus.permanentlyDenied: 'permanentlyDenied',
+  RPPermissionStatus.restricted: 'restricted',
+  RPPermissionStatus.unsupported: 'unsupported',
+  RPPermissionStatus.unknown: 'unknown',
+};
+
 RPStep _$RPStepFromJson(Map<String, dynamic> json) => RPStep(
   identifier: json['identifier'] as String,
   title: json['title'] as String,
   text: json['text'] as String?,
   optional: json['optional'] as bool? ?? false,
   footnote: json['footnote'] as String?,
+  nextButtonText: json['nextButtonText'] as String?,
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPStepToJson(RPStep instance) => <String, dynamic>{
@@ -427,6 +613,7 @@ Map<String, dynamic> _$RPStepToJson(RPStep instance) => <String, dynamic>{
   'text': ?instance.text,
   'optional': instance.optional,
   'footnote': ?instance.footnote,
+  'nextButtonText': ?instance.nextButtonText,
 };
 
 RPFormStep _$RPFormStepFromJson(Map<String, dynamic> json) =>
@@ -447,6 +634,7 @@ RPFormStep _$RPFormStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?
       ..answerFormat = RPAnswerFormat.fromJson(
         json['answerFormat'] as Map<String, dynamic>,
       )
@@ -461,6 +649,7 @@ Map<String, dynamic> _$RPFormStepToJson(RPFormStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'answerFormat': instance.answerFormat.toJson(),
       'placeholder': ?instance.placeholder,
       'autoSkip': instance.autoSkip,
@@ -488,6 +677,7 @@ RPQuestionStep _$RPQuestionStepFromJson(Map<String, dynamic> json) =>
       )
       ..$type = json['__type'] as String?
       ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?
       ..placeholder = json['placeholder'] as String?;
 
 Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
@@ -498,6 +688,7 @@ Map<String, dynamic> _$RPQuestionStepToJson(RPQuestionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'answerFormat': instance.answerFormat.toJson(),
       'placeholder': ?instance.placeholder,
       'autoSkip': instance.autoSkip,
@@ -516,6 +707,7 @@ RPInstructionStep _$RPInstructionStepFromJson(Map<String, dynamic> json) =>
       audioPath: json['audioPath'] as String?,
       videoPath: json['videoPath'] as String?,
       footnote: json['footnote'] as String?,
+      nextButtonText: json['nextButtonText'] as String?,
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPInstructionStepToJson(RPInstructionStep instance) =>
@@ -526,6 +718,7 @@ Map<String, dynamic> _$RPInstructionStepToJson(RPInstructionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'detailText': ?instance.detailText,
       'imagePath': ?instance.imagePath,
       'audioPath': ?instance.audioPath,
@@ -540,7 +733,8 @@ RPCompletionStep _$RPCompletionStepFromJson(Map<String, dynamic> json) =>
         optional: json['optional'] as bool? ?? false,
       )
       ..$type = json['__type'] as String?
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPCompletionStepToJson(RPCompletionStep instance) =>
     <String, dynamic>{
@@ -550,6 +744,7 @@ Map<String, dynamic> _$RPCompletionStepToJson(RPCompletionStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
     };
 
 RPActivityStep _$RPActivityStepFromJson(Map<String, dynamic> json) =>
@@ -562,7 +757,8 @@ RPActivityStep _$RPActivityStepFromJson(Map<String, dynamic> json) =>
       ..title = json['title'] as String
       ..text = json['text'] as String?
       ..optional = json['optional'] as bool
-      ..footnote = json['footnote'] as String?;
+      ..footnote = json['footnote'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPActivityStepToJson(RPActivityStep instance) =>
     <String, dynamic>{
@@ -572,6 +768,7 @@ Map<String, dynamic> _$RPActivityStepToJson(RPActivityStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'includeInstructions': instance.includeInstructions,
       'includeResults': instance.includeResults,
     };
@@ -588,7 +785,8 @@ RPTimerStep _$RPTimerStepFromJson(Map<String, dynamic> json) =>
         footnote: json['footnote'] as String?,
       )
       ..$type = json['__type'] as String?
-      ..text = json['text'] as String?;
+      ..text = json['text'] as String?
+      ..nextButtonText = json['nextButtonText'] as String?;
 
 Map<String, dynamic> _$RPTimerStepToJson(RPTimerStep instance) =>
     <String, dynamic>{
@@ -598,6 +796,7 @@ Map<String, dynamic> _$RPTimerStepToJson(RPTimerStep instance) =>
       'text': ?instance.text,
       'optional': instance.optional,
       'footnote': ?instance.footnote,
+      'nextButtonText': ?instance.nextButtonText,
       'timeout': instance.timeout.inMicroseconds,
       'playSound': instance.playSound,
       'autoSkip': instance.autoSkip,

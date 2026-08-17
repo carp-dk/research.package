@@ -30,6 +30,191 @@ There is a set of tutorials, describing:
 
 The [Research Package Flutter API](https://pub.dev/documentation/research_package/latest/) is available (and maintained) as part of the package release at pub.dev.
 
+## Localization
+
+Translations live in `assets/lang/<languageCode>.json` and are looked up with
+`RPLocalizations.of(context)?.translate('key')`. A key which is not translated is returned as-is, so
+it is safe to pass text which may be either a key or a literal.
+
+**Nested keys.** Translations may be nested and are addressed with a dot-separated path. These two
+files are equivalent, so nested and dot-separated files can be mixed freely and existing flat files
+keep working untouched:
+
+```json
+{ "pages": { "task_list": { "title": "Tasks", "description": "Your tasks" } } }
+{ "pages.task_list.title": "Tasks", "pages.task_list.description": "Your tasks" }
+```
+
+```dart
+locale.translate('pages.task_list.title'); // 'Tasks'
+```
+
+**Interpolation.** `{{placeholder}}` values are filled in from `args`. A placeholder with no
+matching argument is left in place, so a forgotten argument is visible rather than silently blank. A
+single brace is always literal.
+
+```json
+{ "greeting": "Hello {{name}}, you have {{n}} messages" }
+```
+
+```dart
+locale.translate('greeting', args: {'name': 'Bo', 'n': 3});
+// 'Hello Bo, you have 3 messages'
+```
+
+**Plurals.** Give a key one variant per plural category using the `_zero`, `_one`, `_two`, `_few`,
+`_many` and `_other` suffixes, and pass a `count`. The category is picked using the CLDR rules of the
+locale, so a language which needs `_few` and `_many` gets them. `count` is also available to the
+translation as `{{count}}` without passing it in `args`.
+
+```json
+{
+  "tasks_zero": "All done",
+  "tasks_one": "{{count}} task left",
+  "tasks_other": "{{count}} tasks left"
+}
+```
+
+```dart
+locale.translate('tasks', count: 0); // 'All done'
+locale.translate('tasks', count: 1); // '1 task left'
+locale.translate('tasks', count: 5); // '5 tasks left'
+```
+
+Which categories apply depends on the language — English only ever uses `_one` and `_other`. The one
+exception is `_zero`, which is used for a `count` of exactly 0 in any language when present. A
+category which is not translated falls back to `_other`, and a key with no plural variants at all
+falls back to the key itself.
+
+## OS permissions
+
+A consent section can declare the OS permissions its text explains the need for. When the visual
+consent step opts in with `askPermission: true`, tapping "NEXT" on that section triggers the native
+permission dialog — so the participant is asked in context, while the explanation is on screen,
+which is what both Apple and Google ask for.
+
+```dart
+RPConsentSection(
+  type: RPConsentSectionType.Location,
+  summary: 'We use your location to study how you move around.',
+  content: 'The longer explanation shown under "Learn more"...',
+  permissions: [RPPermissionType.location],
+);
+
+RPVisualConsentStep(
+  identifier: 'visualStep',
+  consentDocument: consentDocument,
+  askPermission: true, // off by default - nothing is requested without this
+);
+```
+
+The outcome of every request is collected in an `RPPermissionResult` added to the `RPTaskResult`
+under the identifier of the visual consent step. A denied permission is recorded but never blocks the
+participant.
+
+### Navigation in a consent flow
+
+Apple requires that a screen explaining an upcoming permission request carries a single button,
+leading to the system alert, and offers no way of leaving without seeing that alert — see
+[Human Interface Guidelines: Privacy](https://developer.apple.com/design/human-interface-guidelines/privacy).
+The consent UI enforces this, so a flow using `askPermission` passes review as it is:
+
+* An informed consent flow — any `RPOrderedTask` containing an `RPConsentReviewStep` — has **no
+  close button** in the top bar and **no cancel button** on the consent sections. It is left by
+  pressing "DISAGREE" on the review step, which calls `RPUITask.onCancel` as a cancellation always
+  has.
+* The visual consent step offers a "BACK" button for re-reading earlier sections. It is hidden on
+  the first section, and on any section which is still going to open a permission alert.
+* Once a section's permissions have been asked for, "BACK" reappears on it — the alert has been
+  seen, whatever the participant answered, so the screen is an ordinary consent section again.
+
+### Health data
+
+Health data is the one entry in `RPPermissionType` which is not a single OS permission. Apple
+HealthKit and Android Health Connect authorise each data type on its own — there are over a hundred
+of them — so a section which lists `RPPermissionType.health` must also say *which* types it needs,
+in `healthDataTypes`. Without them there is nothing to request and the permission resolves to
+`RPPermissionStatus.unsupported`.
+
+```dart
+RPConsentSection(
+  type: RPConsentSectionType.Health,
+  summary: 'We read your steps and sleep to see how your activity changes.',
+  permissions: [RPPermissionType.health],
+  healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+);
+```
+
+`HealthDataType` comes from the [health](https://pub.dev/packages/health) package and is re-exported
+by `research_package`, so it needs no separate import. Read access is requested for every type
+listed; types the participant has already authorised are skipped.
+
+**On iOS the recorded status is optimistic.** HealthKit deliberately does not disclose whether read
+access was granted — an app cannot tell "not permitted" from "no data" — so `granted` there means
+the authorisation sheet was shown without error, not that the participant agreed. Android Health
+Connect reports the real outcome. `RPPermissions.requestHealthData()` is public if an app needs to
+ask outside a consent flow.
+
+### Platform setup
+
+Only needed by apps which use `askPermission`.
+
+**Android** — declare each permission in `android/app/src/main/AndroidManifest.xml`. An undeclared
+permission is reported as permanently denied without showing a dialog.
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+```
+
+**iOS** — add a usage description per permission to `ios/Runner/Info.plist`; iOS terminates the app
+if one is missing. For example `NSLocationWhenInUseUsageDescription`,
+`NSMicrophoneUsageDescription` and `NSMotionUsageDescription` (which also covers
+`RPPermissionType.activityRecognition`, since iOS reads activity through CoreMotion).
+
+If the app integrates plugins with **CocoaPods**, each permission additionally has to be enabled in
+`ios/Podfile` — `permission_handler` compiles every permission out of the build unless its macro is
+set:
+
+```ruby
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_LOCATION_WHENINUSE=1', # use PERMISSION_LOCATION=1 for locationAlways
+        'PERMISSION_MICROPHONE=1',
+        'PERMISSION_SENSORS=1',            # activityRecognition and sensors
+      ]
+    end
+  end
+end
+```
+
+With **Swift Package Manager** this step is not needed — the macros are derived from the
+`Info.plist` keys above.
+
+#### Health data
+
+The `health` plugin is a dependency of `research_package`, so its platform requirements apply to
+**every** app using this package, whether or not it asks for health data:
+
+* **Android** — `minSdkVersion 26`. Apps which ask for health data additionally need, in
+  `AndroidManifest.xml`, a `<uses-permission android:name="android.permission.health.READ_*"/>` per
+  data type, a `<package android:name="com.google.android.apps.healthdata"/>` entry under
+  `<queries>`, an `androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` intent filter on the main
+  activity, and the `ViewPermissionUsageActivity` alias. `MainActivity` must extend
+  `FlutterFragmentActivity` rather than `FlutterActivity`, or Health Connect cannot show its
+  permission sheet on Android 14 and later.
+* **iOS** — `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` in `Info.plist`,
+  plus the **HealthKit** capability on the Runner target, added under "Signing & Capabilities" in
+  Xcode. Without the capability the authorisation sheet never appears.
+
+`example/` is set up this way and can be copied from — see its `AndroidManifest.xml`,
+`MainActivity.kt`, `build.gradle.kts` and `Info.plist`.
+
 ## Example Application
 
 There is an [example app](https://github.com/cph-cachet/research.package/tree/master/example) which demonstrates the different features of Research Package as implemented in a Flutter app.
