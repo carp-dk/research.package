@@ -19,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:signature/signature.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:video_player/video_player.dart';
-import 'package:carp_themes_package/carp_themes_package.dart';
 // For the CLDR plural rules used when translating with a `count`.
 import 'package:intl/intl.dart';
 // Prefixed and `show`n, to keep `Permission`, `PermissionStatus` and the rest

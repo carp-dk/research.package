@@ -32,5 +32,6 @@ class RPSignatureResult extends Serializable {
   factory RPSignatureResult.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<RPSignatureResult>(json);
 
+  @override
   Map<String, dynamic> toJson() => _$RPSignatureResultToJson(this);
 }
