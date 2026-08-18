@@ -111,6 +111,11 @@ class RPUIQuestionStepState extends State<RPUIQuestionStep> with CanSaveResult {
             (answerFormat as RPImageChoiceAnswerFormat), (result) {
           currentQuestionBodyResult = result;
         });
+      case const (RPStarChoiceAnswerFormat):
+        return RPUIStarChoiceQuestionBody(
+            (answerFormat as RPStarChoiceAnswerFormat), (result) {
+          currentQuestionBodyResult = result;
+        });
       case const (RPDateTimeAnswerFormat):
         return RPUIDateTimeQuestionBody(
             (answerFormat as RPDateTimeAnswerFormat), (result) {
