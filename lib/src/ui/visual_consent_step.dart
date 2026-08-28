@@ -262,6 +262,13 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
           width: iconSize,
           height: iconSize,
         );
+      case RPConsentSectionType.BackgroundSensing:
+        return Image.asset(
+          'assets/icons/settings.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
       case RPConsentSectionType.Health:
         return Image.asset(
           'assets/icons/health.png',

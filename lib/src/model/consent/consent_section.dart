@@ -112,6 +112,7 @@ enum RPConsentSectionType {
   Benefits,
   DataHandling,
   Location,
+  BackgroundSensing,
   Health,
   HealthDataCollection,
   UserDataCollection,
