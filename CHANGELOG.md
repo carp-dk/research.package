@@ -1,3 +1,18 @@
+## 3.1.0
+
+* New `RPPermissionType.ignoreBatteryOptimizations`, for asking to be exempt
+  from Android's battery optimization so sensing keeps running in the
+  background. Android opens a settings page rather than a dialog, and on iOS —
+  where background execution is granted through the background modes the app
+  declares — it resolves to `RPPermissionStatus.unsupported`.
+* New `RPConsentSectionType.BackgroundSensing`, the consent section which
+  explains background data collection and asks for the exemption above.
+* New `RPConsentSectionType.ActivityRecognition`, `Bluetooth`, `Notification`,
+  `Microphone` and `Camera` sections, so a study asking for several permissions
+  explains each on its own screen rather than bundling them. Each has a
+  localized default title and its own illustration.
+* Hungarian (`hu`) and Chinese (`zh`) translations.
+
 ## 3.0.0
 
 * Localization now supports nested translation keys. A nested json object is

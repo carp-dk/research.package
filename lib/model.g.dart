@@ -335,6 +335,12 @@ const _$RPConsentSectionTypeEnumMap = {
   RPConsentSectionType.Benefits: 'Benefits',
   RPConsentSectionType.DataHandling: 'DataHandling',
   RPConsentSectionType.Location: 'Location',
+  RPConsentSectionType.ActivityRecognition: 'ActivityRecognition',
+  RPConsentSectionType.Bluetooth: 'Bluetooth',
+  RPConsentSectionType.Notification: 'Notification',
+  RPConsentSectionType.Microphone: 'Microphone',
+  RPConsentSectionType.Camera: 'Camera',
+  RPConsentSectionType.BackgroundSensing: 'BackgroundSensing',
   RPConsentSectionType.Health: 'Health',
   RPConsentSectionType.HealthDataCollection: 'HealthDataCollection',
   RPConsentSectionType.UserDataCollection: 'UserDataCollection',
@@ -351,6 +357,7 @@ const _$RPPermissionTypeEnumMap = {
   RPPermissionType.activityRecognition: 'activityRecognition',
   RPPermissionType.sensors: 'sensors',
   RPPermissionType.bluetooth: 'bluetooth',
+  RPPermissionType.ignoreBatteryOptimizations: 'ignoreBatteryOptimizations',
   RPPermissionType.health: 'health',
 };
 

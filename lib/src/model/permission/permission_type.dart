@@ -35,6 +35,10 @@ enum RPPermissionType {
   /// Access to Bluetooth, e.g. for connecting to a wearable device.
   bluetooth,
 
+  /// Exemption from Android's battery optimization, so sensing keeps running
+  /// in the background. Opens a settings page, not a dialog. Android only.
+  ignoreBatteryOptimizations,
+
   /// Access to health data (Apple HealthKit / Android Health Connect).
   ///
   /// Unlike the others this is not a single OS permission — both platforms

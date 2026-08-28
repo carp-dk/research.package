@@ -31,6 +31,12 @@ class RPPermissions {
       return await requestHealthData(healthDataTypes);
     }
 
+    // iOS grants background execution through declared background modes.
+    if (type == RPPermissionType.ignoreBatteryOptimizations &&
+        defaultTargetPlatform != TargetPlatform.android) {
+      return RPPermissionStatus.unsupported;
+    }
+
     try {
       // Background location requires the foreground one first, on both
       // platforms.
@@ -110,6 +116,8 @@ class RPPermissions {
         return ph.Permission.sensors;
       case RPPermissionType.bluetooth:
         return ph.Permission.bluetooth;
+      case RPPermissionType.ignoreBatteryOptimizations:
+        return ph.Permission.ignoreBatteryOptimizations;
       case RPPermissionType.health:
         // Handled by [requestHealthData] before this method is reached.
         throw UnsupportedError(
