@@ -11,6 +11,7 @@
   `Microphone` and `Camera` sections, so a study asking for several permissions
   explains each on its own screen rather than bundling them. Each has a
   localized default title and its own illustration.
+* Hungarian (`hu`) and Chinese (`zh`) translations.
 
 ## 3.0.0
 
