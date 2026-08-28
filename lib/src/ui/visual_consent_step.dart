@@ -262,6 +262,41 @@ class RPUIVisualConsentStepState extends State<RPUIVisualConsentStep>
           width: iconSize,
           height: iconSize,
         );
+      case RPConsentSectionType.ActivityRecognition:
+        return Image.asset(
+          'assets/icons/activity.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
+      case RPConsentSectionType.Bluetooth:
+        return Image.asset(
+          'assets/icons/bluetooth.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
+      case RPConsentSectionType.Notification:
+        return Image.asset(
+          'assets/icons/notification.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
+      case RPConsentSectionType.Microphone:
+        return Image.asset(
+          'assets/icons/microphone.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
+      case RPConsentSectionType.Camera:
+        return Image.asset(
+          'assets/icons/camera.png',
+          package: 'research_package',
+          width: iconSize,
+          height: iconSize,
+        );
       case RPConsentSectionType.BackgroundSensing:
         return Image.asset(
           'assets/icons/settings.png',

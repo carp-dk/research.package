@@ -7,6 +7,10 @@
   declares — it resolves to `RPPermissionStatus.unsupported`.
 * New `RPConsentSectionType.BackgroundSensing`, the consent section which
   explains background data collection and asks for the exemption above.
+* New `RPConsentSectionType.ActivityRecognition`, `Bluetooth`, `Notification`,
+  `Microphone` and `Camera` sections, so a study asking for several permissions
+  explains each on its own screen rather than bundling them. Each has a
+  localized default title and its own illustration.
 
 ## 3.0.0
 
