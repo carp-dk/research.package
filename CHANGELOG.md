@@ -1,3 +1,10 @@
+## 3.1.1
+
+* Fix: `RPUITask` no longer pops its route on cancel or finish when it is the
+  only route in the navigator's stack (e.g. a redirect target). Popping is
+  guarded by `Navigator.canPop()`; when there is nothing below, navigation is
+  left to the `onCancel` / `onSubmit` callbacks.
+
 ## 3.1.0
 
 * New `RPPermissionType.ignoreBatteryOptimizations`, for asking to be exempt
