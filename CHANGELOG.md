@@ -1,3 +1,11 @@
+## 3.1.2
+
+* Fix: requesting `RPPermissionType.bluetooth` on Android now asks for the
+  "Nearby devices" pair (`BLUETOOTH_SCAN` + `BLUETOOTH_CONNECT`) introduced in
+  Android 12, instead of the legacy Bluetooth permission, which is granted
+  without ever showing a dialog. Both are requested in one call, so the user
+  sees a single dialog; if either is refused, that status is reported.
+
 ## 3.1.1
 
 * Fix: `RPUITask` no longer pops its route on cancel or finish when it is the
