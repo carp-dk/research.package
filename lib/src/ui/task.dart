@@ -376,8 +376,11 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                   widget.onCancel?.call(_taskResult);
                   // Popup dismiss
                   Navigator.of(context).pop();
-                  // Exit the Ordered Task
-                  Navigator.of(context).pop();
+                  // Exit the Ordered Task - if the task is the only route
+                  // (e.g. a redirect target), onCancel decides where to go.
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
                 },
               ),
             ),
