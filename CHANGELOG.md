@@ -23,6 +23,12 @@
     should set `ThemeData.colorScheme` instead.
 * Requires `carp_themes_package` 0.2.1, which fixes borders and dividers
   rendering opaque black.
+* Fix: requesting `RPPermissionType.bluetooth` on Android now asks for the
+  "Nearby devices" pair (`BLUETOOTH_SCAN` + `BLUETOOTH_CONNECT`) introduced in
+  Android 12, instead of the legacy Bluetooth permission, which is granted
+  without ever showing a dialog. Both are requested in one call, so the user
+  sees a single dialog; if either is refused, that status is reported.
+
 
 ## 3.1.1
 
