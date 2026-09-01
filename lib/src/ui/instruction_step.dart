@@ -1,7 +1,6 @@
 part of '../../ui.dart';
 
 /// The UI representation of [RPInstructionStep]
-///
 /// In general, you don’t need to instantiate an instruction step widget directly.
 /// Instead, add an instruction step to a task and present the task using a task widget.
 /// When appropriate, the task widget instantiates the step widget for the step.
@@ -91,30 +90,36 @@ class RPUIInstructionStepState extends State<RPUIInstructionStep> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Container(
+                        Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 30, horizontal: 16),
-                          child: Text(
-                            locale?.translate(widget.step.text!) ??
-                                widget.step.text!,
-                            textAlign: TextAlign.start,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                              vertical: 24, horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                locale?.translate(widget.step.title) ??
+                                    widget.step.title,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                locale?.translate(widget.step.text!) ??
+                                    widget.step.text!,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
                           ),
                         ),
                         if (widget.step.detailText != null)
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              textStyle: TextStyle(
-                                color: (CupertinoTheme.of(context)
-                                            .primaryColor ==
-                                        CupertinoColors.activeBlue)
-                                    ? Theme.of(context).primaryColor
-                                    : CupertinoTheme.of(context).primaryColor,
-                              ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            child: TextButton(
+                              onPressed: _pushDetailTextRoute,
+                              child: Text(locale?.translate('learn_more') ??
+                                  "Learn more"),
                             ),
-                            onPressed: _pushDetailTextRoute,
-                            child: Text(locale?.translate('learn_more') ??
-                                "Learn more"),
                           ),
                       ],
                     ),

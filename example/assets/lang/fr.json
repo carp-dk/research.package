@@ -83,5 +83,9 @@
   "ic.health.blood_pressure_systolic": "Pression artérielle systolique",
   "ic.health.pressure_systolic.info": "Vous devez entrer des informations sur la pression artérielle systolique dans la carte de pression artérielle systolique",
   "ic.health.steps": "Pas",
-  "ic.health.steps.info": "Vous devez entrer des informations sur les pas dans la carte de pas"
+  "ic.health.steps.info": "Vous devez entrer des informations sur les pas dans la carte de pas",
+  "branching_survey.step_jump": "Sondage (saut d'étape)",
+  "branching_survey.direct": "Sondage (navigation directe)",
+  "branching_survey.reorganizer": "Sondage (réorganisation des étapes)",
+  "branching_survey.emotional_distress": "Sondage (détresse émotionnelle)"
 }

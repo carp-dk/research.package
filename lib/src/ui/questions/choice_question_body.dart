@@ -91,13 +91,8 @@ class RPUIChoiceQuestionBodyState extends State<RPUIChoiceQuestionBody>
           shrinkWrap: true,
           itemCount: widget.answerFormat.choices.length,
           itemBuilder: _choiceCellBuilder,
-          separatorBuilder: (context, index) => Divider(
-            height: 1,
-            thickness: 1,
-            indent: 16,
-            endIndent: 16,
-            color: Colors.grey.shade300,
-          ),
+          separatorBuilder: (context, index) =>
+              const Divider(height: 1, indent: 16, endIndent: 16),
           physics: const NeverScrollableScrollPhysics(),
         ),
       ],
@@ -146,47 +141,35 @@ class _ChoiceButtonState extends State<_ChoiceButton> {
       padding: const EdgeInsets.only(left: 4, right: 4),
       child: InkWell(
         onTap: () => widget.selectedCallBack(widget.choice),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           (widget.answerStyle == RPChoiceAnswerStyle.SingleChoice)
               ? Radio(
                   value: widget.choice,
                   groupValue: grpChoice,
                   onChanged: (x) => widget.selectedCallBack(widget.choice),
-
-                  /// If the CupertinoTheme is in use, the primary color won't be the default one.
-                  /// In that case we use the CupertinoTheme primary color here, to match the rest of the app.
-                  activeColor: (CupertinoTheme.of(context).primaryColor ==
-                          CupertinoColors.activeBlue)
-                      ? Theme.of(context).primaryColor
-                      : CupertinoTheme.of(context).primaryColor)
+                  activeColor: Theme.of(context).colorScheme.primary,
+                )
               : Checkbox(
                   value: widget.selected,
                   onChanged: (x) => widget.selectedCallBack(widget.choice),
-                  activeColor: (CupertinoTheme.of(context).primaryColor ==
-                          CupertinoColors.activeBlue)
-                      ? Theme.of(context).primaryColor
-                      : CupertinoTheme.of(context).primaryColor,
+                  activeColor: Theme.of(context).colorScheme.primary,
                 ),
           Expanded(
-            child: Container(
-              padding: widget.choice.isFreeText
-                  ? null
-                  : const EdgeInsets.only(bottom: 13),
-              child: widget.choice.isFreeText
-                  ? TextField(
-                      onChanged: (newText) => widget.choice.text = newText,
-                      decoration: InputDecoration(
-                        hintText: locale?.translate(widget.choice.text) ??
-                            widget.choice.text,
-                      ),
-                    )
-                  : Text(
-                      locale?.translate(widget.choice.text) ??
+            child: widget.choice.isFreeText
+                ? TextField(
+                    onChanged: (newText) => widget.choice.text = newText,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      hintText: locale?.translate(widget.choice.text) ??
                           widget.choice.text,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      softWrap: true,
                     ),
-            ),
+                  )
+                : Text(
+                    locale?.translate(widget.choice.text) ?? widget.choice.text,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    softWrap: true,
+                  ),
           ),
           if (widget.choice.detailText != null)
             IconButton(
@@ -200,7 +183,8 @@ class _ChoiceButtonState extends State<_ChoiceButton> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.info))
+                icon: Icon(Icons.info_outline,
+                    color: Theme.of(context).colorScheme.primary))
         ]),
       ),
     );

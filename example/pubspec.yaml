@@ -14,11 +14,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  carp_themes_package: ^0.2.0
+  carp_themes_package: ^0.2.1
   research_package:
     path: ../
-  # carp_serializable:
-  #   path: ../../carp/carp.sensing-flutter/carp_serializable/
 
 dev_dependencies:
   integration_test:

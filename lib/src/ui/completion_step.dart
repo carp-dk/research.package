@@ -1,7 +1,6 @@
 part of '../../ui.dart';
 
 /// The UI representation of [RPCompletionStep]
-///
 /// Typically, you don’t need to instantiate a completion step widget directly. Instead, add a completion step to a task, and present the task with a task widget.
 /// The task widget instantiates the step widget for the completion step.
 class RPUICompletionStep extends StatefulWidget {
@@ -68,23 +67,10 @@ class RPUICompletionStepState extends State<RPUICompletionStep>
                 width: 120,
               ),
             ),
-            ButtonTheme(
-              buttonColor: Theme.of(context).colorScheme.primary,
-              minWidth: 150,
-              child: OutlinedButton(
-                onPressed: () {
-                  blocTask.sendStatus(RPStepStatus.Finished);
-                },
-                child: Text(
-                  RPLocalizations.of(context)?.translate('DONE') ?? "DONE",
-                  style: TextStyle(
-                    color: (CupertinoTheme.of(context).primaryColor ==
-                            CupertinoColors.activeBlue)
-                        ? Theme.of(context).primaryColor
-                        : CupertinoTheme.of(context).primaryColor,
-                  ),
-                ),
-              ),
+            OutlinedButton(
+              onPressed: () => blocTask.sendStatus(RPStepStatus.Finished),
+              child: Text(
+                  RPLocalizations.of(context)?.translate('DONE') ?? "DONE"),
             )
           ],
         ),

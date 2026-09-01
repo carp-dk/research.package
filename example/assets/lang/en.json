@@ -82,5 +82,9 @@
   "ic.health.blood_pressure.info": "We will collect blood pressure data from any blood pressure sensor you may use.",
   "ic.health.steps": "Steps",
   "ic.health.steps.info": "We will automatically collect how many steps you take",
-  "": ""
+  "": "",
+  "branching_survey.step_jump": "Survey (step jump)",
+  "branching_survey.direct": "Survey (direct navigation)",
+  "branching_survey.reorganizer": "Survey (step reorganizer)",
+  "branching_survey.emotional_distress": "Survey (emotional distress)"
 }

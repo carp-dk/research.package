@@ -1,10 +1,34 @@
-## 3.1.2
+## 3.2.0
 
+* Fix: an `RPStepReorganizerRule` no longer removes the step it was triggered
+  from, which left `BACK` dead and stranded the task. It also reorganizes from
+  the steps as defined, so going back and changing the answer can select a
+  branch an earlier answer had removed.
+* Fix: `BACK` follows the steps actually visited instead of comparing against
+  `task.steps.first`, and the task ends when the task says there is no next
+  step rather than when the current step is last in the list. Both stranded
+  tasks whose navigation rules route to the first or past the last step.
+* The confirmation shown when leaving a task now names what is being left and
+  what leaving costs - "Leave survey?" / "Your answers will not be saved." over
+  "Discard results and quit?" - and its destructive action reads `LEAVE` rather
+  than `YES`, which answers a question the participant may not have read. A
+  consent task says it has no consent yet instead of naming answers it never
+  had. Translated in all seven supported languages.
+  * The dialog can now be dismissed by tapping outside it, which keeps the task.
+* Styling now follows the ambient Material theme: the cancel dialog, `BACK`,
+  `DONE` and the choice/text/slider/integer bodies take their colours and text
+  styles from `ThemeData` instead of colouring themselves.
+  * **Breaking**: the widgets no longer read `CupertinoTheme.primaryColor`.
+    An app that styled Research Package by wrapping it in a `CupertinoTheme`
+    should set `ThemeData.colorScheme` instead.
+* Requires `carp_themes_package` 0.2.1, which fixes borders and dividers
+  rendering opaque black.
 * Fix: requesting `RPPermissionType.bluetooth` on Android now asks for the
   "Nearby devices" pair (`BLUETOOTH_SCAN` + `BLUETOOTH_CONNECT`) introduced in
   Android 12, instead of the legacy Bluetooth permission, which is granted
   without ever showing a dialog. Both are requested in one call, so the user
   sees a single dialog; if either is refused, that status is reported.
+
 
 ## 3.1.1
 
