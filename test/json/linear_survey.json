@@ -9,7 +9,6 @@
             "title": "Welcome!",
             "text": "Please fill out this questionnaire!\n\nIn this questionnaire the questions will come after each other in a given order. You still have the chance to skip a some of them though.",
             "optional": false,
-            "footnote": "©️ 2021 Research Package",
             "detailText": "For the sake of science of course..."
         },
         {
@@ -17,7 +16,6 @@
             "identifier": "RPTimerStepID",
             "title": "Please think for a moment about how your day was and note it down in the next step",
             "optional": false,
-            "footnote": "©️ 2021 Research Package",
             "timeout": 5000000,
             "playSound": true,
             "autoSkip": true,
@@ -28,7 +26,6 @@
             "identifier": "formstepID",
             "title": "Questions about music",
             "optional": false,
-            "footnote": "©️ 2021 Research Package",
             "answerFormat": {
                 "__type": "RPFormAnswerFormat",
                 "questionType": "Form"
@@ -127,7 +124,6 @@
             "identifier": "RPTimerStepID",
             "title": "Please think for a moment about how your day was and note it down in the next step",
             "optional": false,
-            "footnote": "©️ 2021 Research Package",
             "timeout": 5000000,
             "playSound": true,
             "autoSkip": true,

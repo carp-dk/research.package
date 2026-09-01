@@ -213,7 +213,6 @@ RPOrderedTask get linearSurveyTask {
     // autoSkip: true,
     // timeout: const Duration(seconds: 6),
     // saveResultsOnAutoSkip: true,
-    footnote: "©️ 2021 Research Package",
   );
 
   final linearCompletionStep = RPCompletionStep(
@@ -228,7 +227,6 @@ RPOrderedTask get linearSurveyTask {
     detailText: "For the sake of science of course...",
     text:
         "In this questionnaire the questions will come after each other in a given order. You still be able to skip some of them though.",
-    footnote: "©️ 2021 Research Package",
     imagePath: "assets/images/survey.png",
   );
 
@@ -239,7 +237,6 @@ RPOrderedTask get linearSurveyTask {
         "Please think for a moment about how your day was and note it down in the next step",
     playSound: true,
     autoSkip: true,
-    footnote: "©️ 2021 Research Package",
   );
 
 
