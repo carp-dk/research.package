@@ -271,7 +271,9 @@ class RPUIFormStepState extends State<RPUIFormStep> {
             child: Text(
               locale?.translate(widget.formStep.questions[index].title) ??
                   widget.formStep.questions[index].title,
-              style: Theme.of(context).textTheme.titleLarge,
+              // The form's own title is the headline; a question inside it is
+              // one level down.
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           Padding(
@@ -281,11 +283,7 @@ class RPUIFormStepState extends State<RPUIFormStep> {
               widget.formStep.questions[index].answerFormat,
             ),
           ),
-          Divider(
-              indent: 1,
-              endIndent: 1,
-              color: Theme.of(context).dividerColor,
-              thickness: 2)
+          const Divider(height: 24),
         ],
       ),
     );

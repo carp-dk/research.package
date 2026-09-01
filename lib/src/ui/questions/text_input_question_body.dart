@@ -42,18 +42,12 @@ class RPUITextInputQuestionBodyState extends State<RPUITextInputQuestionBody>
             : widget.answerFormat.hintText,
         border: OutlineInputBorder(
           borderSide: BorderSide(
-            color: (CupertinoTheme.of(context).primaryColor ==
-                    CupertinoColors.activeBlue)
-                ? Theme.of(context).primaryColor
-                : CupertinoTheme.of(context).primaryColor,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: (CupertinoTheme.of(context).primaryColor ==
-                    CupertinoColors.activeBlue)
-                ? Theme.of(context).primaryColor
-                : CupertinoTheme.of(context).primaryColor,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       ),

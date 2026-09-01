@@ -13,6 +13,14 @@ class RPNavigableOrderedTask extends RPOrderedTask {
   /// rule([RPStepNavigationRule]).
   Map<String, RPStepNavigationRule> stepNavigationRules = {};
 
+  /// The steps as the task was defined, before any [RPStepReorganizerRule]
+  /// narrowed them down.
+  ///
+  /// The rule filters [steps], so reorganizing from [steps] a second time
+  /// could only ever remove more. A participant who goes back and changes the
+  /// answer is reorganizing the task anew - from this list.
+  late final List<RPStep> _definedSteps = List.of(steps);
+
   RPNavigableOrderedTask({
     required super.identifier,
     required super.steps,
@@ -86,20 +94,29 @@ class RPNavigableOrderedTask extends RPOrderedTask {
             stepResult = foundStepResult;
           }
 
-          List identifiersToKeep = [];
-          for (var element
-              in (stepResult!.results["answer"] as List<RPChoice>)) {
-            String id = reorganizerRule.reorderingMap[element.value]!;
-            identifiersToKeep.add(id);
-          }
+          List identifiersToKeep = [
+            for (var choice in (stepResult!.results["answer"] as List<RPChoice>))
+              reorganizerRule.reorderingMap[choice.value]!
+          ];
 
-          steps.removeWhere(
-              (step) => !identifiersToKeep.contains(step.identifier));
+          // Only the steps *after* the trigger are reorganized. Dropping the
+          // steps already visited - the trigger included - would strand the
+          // task: it could no longer locate the current step to advance from,
+          // nor navigate back to what the participant already answered.
+          int triggerIndex = _definedSteps.indexOf(step);
+          RPStep lastStep = _definedSteps.last;
 
-          if (steps.last.runtimeType == RPCompletionStep) {
-            RPStep lastStep = steps.last;
-            steps.add(lastStep);
-          }
+          steps = [
+            ..._definedSteps.take(triggerIndex + 1),
+            ..._definedSteps
+                .skip(triggerIndex + 1)
+                .where((step) => identifiersToKeep.contains(step.identifier)),
+            // A task ending in a completion step still ends in it, whichever
+            // branch the answer selected.
+            if (lastStep is RPCompletionStep &&
+                !identifiersToKeep.contains(lastStep.identifier))
+              lastStep,
+          ];
 
           returnNextQuestion();
 

@@ -28,63 +28,57 @@ class RPUIImageChoiceQuestionBodyState
         ? (locale?.translate('select_image') ?? 'Select an image')
         : (locale?.translate(_selectedItem!.description) ??
             _selectedItem!.description);
-    return SizedBox(
-        height: 160,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _buildList(context, widget.answerFormat.choices),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.headlineSmall,
-            )
-          ],
-        ));
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _buildList(context, widget.answerFormat.choices),
+        const SizedBox(height: 16),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ],
+    );
   }
 
-  Row _buildList(BuildContext context, List<RPImageChoice> items) {
-    List<Widget> list = [];
-    for (var item in items) {
-      list.add(
-        InkWell(
-          borderRadius: BorderRadius.circular(15),
-          onTap: () {
-            setState(() {
-              _selectedItem = item == _selectedItem ? null : item;
-            });
-            widget.onResultChance(_selectedItem);
-          },
-          child: Container(
-            // Highlighting of chosen answer
-            decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.all(Radius.circular(5 * 25 / items.length)),
-              border: Border.all(
-                color: _selectedItem == item
-                    ? Theme.of(context).dividerColor
-                    : Colors.transparent,
-                width: 3,
+  Widget _buildList(BuildContext context, List<RPImageChoice> items) {
+    // Wraps rather than shrinking every image to fit one row, so a long list
+    // stays tappable.
+    const double size = 72;
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (var item in items)
+          InkWell(
+            borderRadius: BorderRadius.circular(size),
+            onTap: () {
+              setState(() {
+                _selectedItem = item == _selectedItem ? null : item;
+              });
+              widget.onResultChance(_selectedItem);
+            },
+            child: Container(
+              // Highlighting of chosen answer
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _selectedItem == item
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                  width: 3,
+                ),
               ),
+              padding: const EdgeInsets.all(4),
+              width: size,
+              height: size,
+              child: Image.asset(item.imageUrl),
             ),
-            // Scaling item size with number of choices
-            // Max size is 125
-            padding: EdgeInsets.all(10 / items.length),
-            width:
-                (MediaQuery.of(context).size.width * 0.8) / items.length > 125
-                    ? 125
-                    : MediaQuery.of(context).size.width * 0.8 / items.length,
-            height:
-                (MediaQuery.of(context).size.width * 0.8) / items.length > 125
-                    ? 125
-                    : MediaQuery.of(context).size.width * 0.8 / items.length,
-            child: Image.asset(item.imageUrl),
           ),
-        ),
-      );
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: list,
+      ],
     );
   }
 

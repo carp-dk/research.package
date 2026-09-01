@@ -234,10 +234,16 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           // For now, the same thing has to happen whether a step is finished or skipped.
           // But the "Skipped" status is included to cover this case also.
 
-          // In case of last step we save the result and close the task -
-          // unless the task is the only route (e.g. a redirect target), in
-          // which case onSubmit decides where to go.
-          if (_currentStep == widget.task.steps.last) {
+          // Whether the task is over is the task's answer to give: a navigation
+          // rule may route on from the step that happens to be last in the
+          // list, and may route to it long before the end.
+          RPStep? nextStep =
+              widget.task.getStepAfterStep(_activeSteps.last, null);
+
+          // On the last step we save the result and close the task - unless the
+          // task is the only route (e.g. a redirect target), in which case
+          // onSubmit decides where to go.
+          if (nextStep == null) {
             createAndSendResult();
             if (widget.task.closeAfterFinished) {
               if (context.mounted && Navigator.of(context).canPop()) {
@@ -256,11 +262,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
             }
           }
 
-          // Find the next step and then navigate there
           setState(() {
-            _currentStep = _activeSteps.last;
-            _currentStep = widget.task.getStepAfterStep(_currentStep, null);
-            if (_currentStep != null) _activeSteps.add(_currentStep!);
+            _currentStep = nextStep;
+            _activeSteps.add(nextStep);
           });
           _currentStepIndex++;
 
@@ -272,12 +276,11 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           showCancelConfirmationDialog();
           break;
         case RPStepStatus.Back:
-          // If the stepWidgets list only has 1 element it means the user is on
-          // the first question, so no back navigation is enabled.
+          // The visited steps are the only thing back navigation depends on:
+          // with a single one there is nothing to go back to. Comparing against
+          // `task.steps.first` instead would strand any step a navigation rule
+          // moved to the front of the task.
           if (_activeSteps.length == 1) {
-            break;
-          }
-          if (_currentStep == widget.task.steps.first) {
             break;
           } else {
             _currentQuestionIndex--;
@@ -346,45 +349,25 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                   "Discard results and quit?"),
           actions: <Widget>[
             OutlinedButton(
-              child: Text(
-                RPLocalizations.of(context)?.translate('NO') ?? "NO",
-                style: TextStyle(
-                    color: ((CupertinoTheme.of(context).primaryColor ==
-                            CupertinoColors.activeBlue)
-                        ? Theme.of(context).primaryColor
-                        : CupertinoTheme.of(context).primaryColor)),
-              ),
               onPressed: () =>
                   Navigator.of(context).pop(), // Dismissing the pop-up
+              child: Text(RPLocalizations.of(context)?.translate('NO') ?? "NO"),
             ),
-            ButtonTheme(
-              minWidth: 70,
-              child: TextButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                      (CupertinoTheme.of(context).primaryColor ==
-                              CupertinoColors.activeBlue)
-                          ? Theme.of(context).primaryColor
-                          : CupertinoTheme.of(context).primaryColor),
-                ),
-                child: Text(
-                  RPLocalizations.of(context)?.translate('YES') ?? "YES",
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onPressed: () {
-                  // Calling the onCancel method with which the developer can for
-                  // e.g. save the result on the device.
-                  // Only call it if it's not null
-                  widget.onCancel?.call(_taskResult);
-                  // Popup dismiss
+            FilledButton(
+              onPressed: () {
+                // Calling the onCancel method with which the developer can for
+                // e.g. save the result on the device.
+                // Only call it if it's not null
+                widget.onCancel?.call(_taskResult);
+                // Popup dismiss
+                Navigator.of(context).pop();
+                // Exit the Ordered Task - if the task is the only route
+                // (e.g. a redirect target), onCancel decides where to go.
+                if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
-                  // Exit the Ordered Task - if the task is the only route
-                  // (e.g. a redirect target), onCancel decides where to go.
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
+                }
+              },
+              child: Text(RPLocalizations.of(context)?.translate('YES') ?? "YES"),
             ),
           ],
         );
@@ -477,10 +460,7 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                       alignment: Alignment.centerRight,
                       icon: Icon(
                         Icons.highlight_off,
-                        color: ((CupertinoTheme.of(context).primaryColor ==
-                                CupertinoColors.activeBlue)
-                            ? Theme.of(context).primaryColor
-                            : CupertinoTheme.of(context).primaryColor),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       onPressed: () =>
                           blocTask.sendStatus(RPStepStatus.Canceled),
@@ -557,19 +537,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                       !showBackButton
                           ? Container()
                           : OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                  backgroundColor: (CupertinoTheme.of(context)
-                                              .primaryColor ==
-                                          CupertinoColors.activeBlue)
-                                      ? Theme.of(context).primaryColor
-                                      : CupertinoTheme.of(context)
-                                          .primaryColor),
                               onPressed: () =>
                                   blocTask.sendStatus(RPStepStatus.Back),
-                              child: Text(
-                                locale?.translate('BACK') ?? 'BACK',
-                                style: const TextStyle(color: Colors.white),
-                              ),
+                              child: Text(locale?.translate('BACK') ?? 'BACK'),
                             ),
                       StreamBuilder<bool>(
                         stream: blocQuestion.questionReadyToProceed,

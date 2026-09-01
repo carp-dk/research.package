@@ -91,30 +91,38 @@ class RPUIInstructionStepState extends State<RPUIInstructionStep> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Container(
+                        Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 30, horizontal: 16),
-                          child: Text(
-                            locale?.translate(widget.step.text!) ??
-                                widget.step.text!,
-                            textAlign: TextAlign.start,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                              vertical: 24, horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                locale?.translate(widget.step.title) ??
+                                    widget.step.title,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 12),
+                              // Body copy, not a heading: an instruction is
+                              // often several paragraphs long.
+                              Text(
+                                locale?.translate(widget.step.text!) ??
+                                    widget.step.text!,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
                           ),
                         ),
                         if (widget.step.detailText != null)
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              textStyle: TextStyle(
-                                color: (CupertinoTheme.of(context)
-                                            .primaryColor ==
-                                        CupertinoColors.activeBlue)
-                                    ? Theme.of(context).primaryColor
-                                    : CupertinoTheme.of(context).primaryColor,
-                              ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            child: TextButton(
+                              onPressed: _pushDetailTextRoute,
+                              child: Text(locale?.translate('learn_more') ??
+                                  "Learn more"),
                             ),
-                            onPressed: _pushDetailTextRoute,
-                            child: Text(locale?.translate('learn_more') ??
-                                "Learn more"),
                           ),
                       ],
                     ),

@@ -68,23 +68,10 @@ class RPUICompletionStepState extends State<RPUICompletionStep>
                 width: 120,
               ),
             ),
-            ButtonTheme(
-              buttonColor: Theme.of(context).colorScheme.primary,
-              minWidth: 150,
-              child: OutlinedButton(
-                onPressed: () {
-                  blocTask.sendStatus(RPStepStatus.Finished);
-                },
-                child: Text(
-                  RPLocalizations.of(context)?.translate('DONE') ?? "DONE",
-                  style: TextStyle(
-                    color: (CupertinoTheme.of(context).primaryColor ==
-                            CupertinoColors.activeBlue)
-                        ? Theme.of(context).primaryColor
-                        : CupertinoTheme.of(context).primaryColor,
-                  ),
-                ),
-              ),
+            OutlinedButton(
+              onPressed: () => blocTask.sendStatus(RPStepStatus.Finished),
+              child: Text(
+                  RPLocalizations.of(context)?.translate('DONE') ?? "DONE"),
             )
           ],
         ),

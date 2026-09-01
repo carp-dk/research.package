@@ -1,3 +1,22 @@
+## 3.2.0
+
+* Fix: an `RPStepReorganizerRule` no longer removes the step it was triggered
+  from, which left `BACK` dead and stranded the task. It also reorganizes from
+  the steps as defined, so going back and changing the answer can select a
+  branch an earlier answer had removed.
+* Fix: `BACK` follows the steps actually visited instead of comparing against
+  `task.steps.first`, and the task ends when the task says there is no next
+  step rather than when the current step is last in the list. Both stranded
+  tasks whose navigation rules route to the first or past the last step.
+* Styling now follows the ambient Material theme: the cancel dialog, `BACK`,
+  `DONE` and the choice/text/slider/integer bodies take their colours and text
+  styles from `ThemeData` instead of colouring themselves.
+  * **Breaking**: the widgets no longer read `CupertinoTheme.primaryColor`.
+    An app that styled Research Package by wrapping it in a `CupertinoTheme`
+    should set `ThemeData.colorScheme` instead.
+* Requires `carp_themes_package` 0.2.1, which fixes borders and dividers
+  rendering opaque black.
+
 ## 3.1.1
 
 * Fix: `RPUITask` no longer pops its route on cancel or finish when it is the

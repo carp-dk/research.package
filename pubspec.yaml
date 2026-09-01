@@ -1,6 +1,6 @@
 name: research_package
 description: A Flutter framework for obtaining informed consent, showing surveys and collecting results.
-version: 3.1.1
+version: 3.2.0
 homepage: https://github.com/cph-cachet/research.package
 
 environment:
@@ -24,13 +24,16 @@ dependencies:
   health: '>=13.0.0 <14.0.0'  # Health data is not covered by permission_handler - see RPPermissionType.health
   intl: '>=0.19.0 <0.21.0'  # For the CLDR plural rules used in translations
 
-# Overriding carp core libraries to use the local copy
-# Remove this before release of package
-# dependency_overrides:
+# Overriding carp libraries to use a local copy. Uncomment while developing
+# against an unreleased change; a committed path override breaks any checkout
+# without that sibling directory.
+# TODO: remove once carp_themes_package 0.2.1 is published - the black
+# divider/dialog fix this package needs is only in the local copy until then.
+dependency_overrides:
+  carp_themes_package:
+    path: ../carp_themes_package/
 #   carp_serializable:
 #     path: ../carp/carp.sensing-flutter/carp_serializable/
-# carp_themes_package:
-#   path: ../carp_themes_package/
 
 dev_dependencies:
   flutter_test:
