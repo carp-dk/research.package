@@ -2,7 +2,6 @@ part of '../../../model.dart';
 
 /// The [RPNavigableOrderedTask] class adds conditional step navigation to the
 /// behavior inherited from the [RPOrderedTask] class.
-///
 /// It's able to show different questions based on previous answers by using
 /// [RPStepNavigationRule]s.
 /// This task allows participant to go back to/looping through previous questions.
@@ -13,12 +12,6 @@ class RPNavigableOrderedTask extends RPOrderedTask {
   /// rule([RPStepNavigationRule]).
   Map<String, RPStepNavigationRule> stepNavigationRules = {};
 
-  /// The steps as the task was defined, before any [RPStepReorganizerRule]
-  /// narrowed them down.
-  ///
-  /// The rule filters [steps], so reorganizing from [steps] a second time
-  /// could only ever remove more. A participant who goes back and changes the
-  /// answer is reorganizing the task anew - from this list.
   late final List<RPStep> _definedSteps = List.of(steps);
 
   RPNavigableOrderedTask({
@@ -29,7 +22,6 @@ class RPNavigableOrderedTask extends RPOrderedTask {
 
   /// Returns the step after a specified step if there's any, taking the
   /// [RPStepNavigationRule]s into consideration.
-  ///
   /// If the specified step is `null` then it returns the first step.
   /// Returns `null` if [step] was the last one in the sequence.
   @override
@@ -99,10 +91,6 @@ class RPNavigableOrderedTask extends RPOrderedTask {
               reorganizerRule.reorderingMap[choice.value]!
           ];
 
-          // Only the steps *after* the trigger are reorganized. Dropping the
-          // steps already visited - the trigger included - would strand the
-          // task: it could no longer locate the current step to advance from,
-          // nor navigate back to what the participant already answered.
           int triggerIndex = _definedSteps.indexOf(step);
           RPStep lastStep = _definedSteps.last;
 
@@ -111,8 +99,6 @@ class RPNavigableOrderedTask extends RPOrderedTask {
             ..._definedSteps
                 .skip(triggerIndex + 1)
                 .where((step) => identifiersToKeep.contains(step.identifier)),
-            // A task ending in a completion step still ends in it, whichever
-            // branch the answer selected.
             if (lastStep is RPCompletionStep &&
                 !identifiersToKeep.contains(lastStep.identifier))
               lastStep,
@@ -194,7 +180,6 @@ class RPNavigableOrderedTask extends RPOrderedTask {
   }
 
   /// Adds a navigation rule to a step using its identifier.
-  ///
   /// ```
   ///   RPNavigableOrderedTask navigableSurveyTask = RPNavigableOrderedTask(
   ///     "NavigableTaskID",

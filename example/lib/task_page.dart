@@ -1,6 +1,5 @@
 part of 'main.dart';
 
-/// Runs any [RPOrderedTask] in an [RPUITask] and logs the result.
 class TaskPage extends StatelessWidget {
   final RPOrderedTask task;
   const TaskPage(this.task, {super.key});

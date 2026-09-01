@@ -156,8 +156,6 @@ class _ChoiceButtonState extends State<_ChoiceButton> {
                 ),
           Expanded(
             child: widget.choice.isFreeText
-                // Borderless: the row already sits on the list's own divider,
-                // a field underline on top of it reads as a double rule.
                 ? TextField(
                     onChanged: (newText) => widget.choice.text = newText,
                     decoration: InputDecoration(

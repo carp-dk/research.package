@@ -80,10 +80,6 @@ class RPDemoApp extends StatelessWidget {
   }
 }
 
-/// Every example task in this app, keyed by its localization key.
-///
-/// Built lazily: navigation rules such as [RPStepReorganizerRule] mutate the
-/// task they run in, so each run needs a fresh one.
 Map<String, RPOrderedTask Function()> get exampleTasks => {
       'informed_consent': () => consentTask,
       'linear_survey': () => linearSurveyTask,

@@ -1,7 +1,6 @@
 part of '../../ui.dart';
 
 /// The UI representation of [RPInstructionStep]
-///
 /// In general, you don’t need to instantiate an instruction step widget directly.
 /// Instead, add an instruction step to a task and present the task using a task widget.
 /// When appropriate, the task widget instantiates the step widget for the step.
@@ -104,8 +103,6 @@ class RPUIInstructionStepState extends State<RPUIInstructionStep> {
                                     Theme.of(context).textTheme.headlineSmall,
                               ),
                               const SizedBox(height: 12),
-                              // Body copy, not a heading: an instruction is
-                              // often several paragraphs long.
                               Text(
                                 locale?.translate(widget.step.text!) ??
                                     widget.step.text!,

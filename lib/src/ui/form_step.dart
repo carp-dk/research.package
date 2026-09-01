@@ -271,8 +271,6 @@ class RPUIFormStepState extends State<RPUIFormStep> {
             child: Text(
               locale?.translate(widget.formStep.questions[index].title) ??
                   widget.formStep.questions[index].title,
-              // The form's own title is the headline; a question inside it is
-              // one level down.
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),

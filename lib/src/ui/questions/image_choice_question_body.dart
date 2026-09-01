@@ -43,8 +43,6 @@ class RPUIImageChoiceQuestionBodyState
   }
 
   Widget _buildList(BuildContext context, List<RPImageChoice> items) {
-    // Wraps rather than shrinking every image to fit one row, so a long list
-    // stays tappable.
     const double size = 72;
 
     return Wrap(
@@ -62,7 +60,6 @@ class RPUIImageChoiceQuestionBodyState
               widget.onResultChance(_selectedItem);
             },
             child: Container(
-              // Highlighting of chosen answer
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(

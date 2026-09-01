@@ -2,7 +2,6 @@ part of '../../ui.dart';
 
 /// Signature for building a replacement for the default carousel bar shown at
 /// the top of an [RPUITask].
-///
 /// [stepIndex] is the zero-based index of the step currently on screen.
 /// [stepCount] is the number of steps in the task — for an
 /// [RPNavigableOrderedTask] not every step is necessarily shown, so it is an
@@ -15,7 +14,6 @@ typedef RPCarouselBarBuilder = Widget Function(
 
 /// Signature for building a replacement for the default bottom navigation shown
 /// at the bottom of an [RPUITask].
-///
 /// [navigation] carries the actions of the task — advancing, going back and
 /// cancelling — so a custom bar drives the task the same way the default one
 /// does. See [RPTaskNavigation].
@@ -25,27 +23,23 @@ typedef RPBottomNavigationBuilder = Widget Function(
 );
 
 /// The navigation of an [RPUITask], handed to an [RPBottomNavigationBuilder].
-///
 /// It exposes what the default bottom bar does — advance, go back, cancel —
 /// together with the state those actions depend on, so that a custom bar can be
 /// built without reaching into the task's internals.
 class RPTaskNavigation {
   /// Advances to the next step, or `null` while the current step is not ready
   /// to be left — an unanswered question, typically.
-  ///
   /// Passing it straight to a button's `onPressed` therefore disables the
   /// button until the step is answered.
   final VoidCallback? onNext;
 
   /// Returns to the previous step, or `null` on the first step of the task,
   /// where there is nothing to go back to.
-  ///
   /// Note that the default bar is stricter than this: it only offers BACK in an
   /// [RPNavigableOrderedTask]. A custom bar may offer it in a linear task too.
   final VoidCallback? onBack;
 
   /// Cancels the task, after asking the participant to confirm in a dialog.
-  ///
   /// This is what the close button of the default carousel bar does. To end the
   /// task without confirmation, call [RPUITask.onCancel] directly and pop the
   /// route.
@@ -56,7 +50,6 @@ class RPTaskNavigation {
   final bool canProceed;
 
   /// The step currently on screen.
-  ///
   /// The default bar draws nothing on an [RPCompletionStep],
   /// [RPVisualConsentStep] or [RPConsentReviewStep], since those steps carry
   /// their own buttons. A custom bar is built on every step instead, and can
@@ -100,15 +93,12 @@ class RPUITask extends StatefulWidget {
   final Color? carouselBarBackgroundColor;
 
   /// Builds a replacement for the default carousel bar at the top of the task.
-  ///
   /// When `null` the default bar is shown — logo, "x of y" progress and a close
   /// button — configured through [carouselBarImage],
   /// [carouselBarHorizontalPadding], [carouselBarVerticalPadding] and
   /// [carouselBarBackgroundColor]. Those four are ignored when a builder is
   /// supplied, since the builder owns the whole bar.
-  ///
   /// Return `const SizedBox.shrink()` to remove the bar entirely.
-  ///
   /// Note that the default bar holds the only built-in way to cancel a task, so
   /// a replacement should provide its own affordance — either
   /// `blocTask.sendStatus(RPStepStatus.Canceled)` to cancel directly, or
@@ -116,14 +106,11 @@ class RPUITask extends StatefulWidget {
   final RPCarouselBarBuilder? carouselBarBuilder;
 
   /// Builds a replacement for the default bottom navigation of the task.
-  ///
   /// When `null` the default row is shown — a BACK button in a navigable task
   /// and a NEXT button, configured through [nextButtonText] and
   /// [nextButtonStyle]. Those two are ignored when a builder is supplied, since
   /// the builder owns the whole row.
-  ///
   /// Return `const SizedBox.shrink()` to remove the row entirely.
-  ///
   /// The default row hides itself on the steps which carry their own buttons
   /// ([RPCompletionStep], [RPVisualConsentStep] and [RPConsentReviewStep]); the
   /// builder is called on every step instead, with
@@ -131,21 +118,17 @@ class RPUITask extends StatefulWidget {
   final RPBottomNavigationBuilder? bottomNavigationBuilder;
 
   /// Text for the button that advances to the next step.
-  ///
   /// May be a localization key or a literal — anything the localizations do
   /// not recognise is shown as-is.
-  ///
   /// When `null` the localized `'NEXT'` key is used, falling back to `"NEXT"`.
   /// Applies to every step; a step's own [RPStep.nextButtonText] wins over it.
   final String? nextButtonText;
 
   /// Style for the button that advances to the next step.
-  ///
   /// Properties set here win. Anything left null falls back to the default —
   /// a [CarpColors.primary] background — and then to the ambient
   /// [ElevatedButtonThemeData], so overriding only `shape` keeps the default
   /// colour. Pass a `backgroundColor` to change the colour too.
-  ///
   /// The label is drawn white unless a `foregroundColor` is given here.
   final ButtonStyle? nextButtonStyle;
 
@@ -155,13 +138,11 @@ class RPUITask extends StatefulWidget {
 
   /// The callback function which has to return an [RPTaskResult] object.
   /// This function is called when the participant cancels a survey. The result parameter is optional so if you don't want to do grab the result as part of the callback function you can do so, like the following:
-  ///
   /// ```
   /// onCancel: ([result]) {
   ///        cancelCallBack();
   ///      },
   /// ```
-  ///
   /// It's optional. If not provided (is `null`) the survey just stops
   /// without doing anything with the result.
   final void Function(RPTaskResult? result)? onCancel;
@@ -189,11 +170,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   RPTaskResult? _taskResult;
 
   /// A list of actual steps to show in the task.
-  ///
   /// If the task is a [RPNavigableOrderedTask] not all the questions necessarily
   /// show up because of branching, i.e., some questions could be skipped based
   /// on previous answers.
-  ///
   /// It is a dynamic list which grows and shrinks according to the forward of
   /// back navigation of the task.
   final List<RPStep> _activeSteps = [];
@@ -234,15 +213,9 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           // For now, the same thing has to happen whether a step is finished or skipped.
           // But the "Skipped" status is included to cover this case also.
 
-          // Whether the task is over is the task's answer to give: a navigation
-          // rule may route on from the step that happens to be last in the
-          // list, and may route to it long before the end.
           RPStep? nextStep =
               widget.task.getStepAfterStep(_activeSteps.last, null);
 
-          // On the last step we save the result and close the task - unless the
-          // task is the only route (e.g. a redirect target), in which case
-          // onSubmit decides where to go.
           if (nextStep == null) {
             createAndSendResult();
             if (widget.task.closeAfterFinished) {
@@ -276,10 +249,6 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
           showCancelConfirmationDialog();
           break;
         case RPStepStatus.Back:
-          // The visited steps are the only thing back navigation depends on:
-          // with a single one there is nothing to go back to. Comparing against
-          // `task.steps.first` instead would strand any step a navigation rule
-          // moved to the front of the task.
           if (_activeSteps.length == 1) {
             break;
           } else {
@@ -336,14 +305,11 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   }
 
   void showCancelConfirmationDialog() {
-    // A consent form has no answers to lose, so it says what is actually at
-    // stake: leaving without having consented.
     final key =
         widget.task.isConsentTask ? 'cancel_confirmation' : 'discard_confirmation';
 
     showDialog<dynamic>(
       context: context,
-      // Tapping outside keeps the task, which is the safe outcome.
       builder: (BuildContext context) {
         final locale = RPLocalizations.of(context);
         return AlertDialog(
@@ -363,14 +329,8 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
             ),
             FilledButton(
               onPressed: () {
-                // Calling the onCancel method with which the developer can for
-                // e.g. save the result on the device.
-                // Only call it if it's not null
                 widget.onCancel?.call(_taskResult);
-                // Popup dismiss
                 Navigator.of(context).pop();
-                // Exit the Ordered Task - if the task is the only route
-                // (e.g. a redirect target), onCancel decides where to go.
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
                 }
@@ -384,7 +344,6 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   }
 
   /// Label for the Next button.
-  ///
   /// The current step's [RPStep.nextButtonText] wins over the task-wide
   /// [RPUITask.nextButtonText]; with neither set the `'NEXT'` key is used.
   /// Either value may be a localization key or a literal — [translate] returns
