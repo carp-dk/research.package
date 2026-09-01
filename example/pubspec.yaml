@@ -14,7 +14,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  carp_themes_package: ^0.2.1  # 0.2.1 fixes the black dividers and dialog title
+  carp_themes_package: ^0.2.1
   research_package:
     path: ../
 
