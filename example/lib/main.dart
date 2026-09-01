@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,9 +6,7 @@ import 'package:research_package/research_package.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_themes_package/carp_themes_package.dart';
 
-part 'informed_consent_page.dart';
-part 'linear_survey_page.dart';
-part 'navigable_survey_page.dart';
+part 'task_page.dart';
 part 'research_package_objects/informed_consent.dart';
 part 'research_package_objects/linear_survey.dart';
 part 'research_package_objects/navigation_direct_step_navigation_rule.dart';
@@ -83,91 +80,73 @@ class RPDemoApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatefulWidget {
+/// Every example task in this app, keyed by its localization key.
+///
+/// Built lazily: navigation rules such as [RPStepReorganizerRule] mutate the
+/// task they run in, so each run needs a fresh one.
+Map<String, RPOrderedTask Function()> get exampleTasks => {
+      'informed_consent': () => consentTask,
+      'linear_survey': () => linearSurveyTask,
+      'branching_survey': () => stepJumpNavigationExample1,
+      'branching_survey.step_jump': () => stepJumpNavigationExample2,
+      'branching_survey.direct': () => directNavigationExample,
+      'branching_survey.reorganizer': () => stepReorganizerNavigationExample,
+      'branching_survey.emotional_distress': () => emotionalDistress,
+    };
+
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  HomePageState createState() => HomePageState();
-}
-
-class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     RPLocalizations? locale = RPLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xff003F6E),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
           children: <Widget>[
-            Padding(padding: const EdgeInsets.all(10.0), child: Image.asset("assets/images/carp_logo.png", height: 80)),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    locale?.translate("home.welcome") ?? "Welcome",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  Container(height: 5),
-                  Text(
-                    locale?.translate("home.questions") ?? "Questions?",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  Container(height: 5),
-                  const Text(
-                    "support@carp.dk",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.white, decoration: TextDecoration.underline),
-                  ),
-                  //Container(height: 50),
-                ],
-              ),
+            Image.asset("assets/images/carp_logo.png", height: 80),
+            const SizedBox(height: 20),
+            Text(
+              locale?.translate("home.welcome") ?? "Welcome",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Column(
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
-                    child: Text(locale?.translate("informed_consent") ?? "Informed Consent", style: const TextStyle(color: Colors.white, fontSize: 18)),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => InformedConsentPage()));
-                    },
-                  ),
-                  Container(height: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
-                    child: Text(locale?.translate("linear_survey") ?? "Linear Survey", style: const TextStyle(color: Colors.white, fontSize: 18)),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => LinearSurveyPage()));
-                    },
-                  ),
-                  Container(height: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffC32C39), fixedSize: const Size(300, 60)),
-                    child: Text(locale?.translate("branching_survey") ?? "Branching Survey", style: const TextStyle(color: Colors.white, fontSize: 18)),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute<dynamic>(builder: (context) => NavigableSurveyPage()));
-                    },
-                  ),
-                ],
-              ),
+            const SizedBox(height: 5),
+            Text(
+              locale?.translate("home.questions") ?? "Questions?",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
+            const SizedBox(height: 5),
+            const Text(
+              "support@carp.dk",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.white, decoration: TextDecoration.underline),
+            ),
+            const SizedBox(height: 20),
+            for (final entry in exampleTasks.entries)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffC32C39),
+                    minimumSize: const Size.fromHeight(60),
+                  ),
+                  child: Text(
+                    locale?.translate(entry.key) ?? entry.key,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<dynamic>(builder: (_) => TaskPage(entry.value()))),
+                ),
+              ),
           ],
         ),
       ),
-      // bottomNavigationBar: SafeArea(
-      //     child: Padding(
-      //   padding: const EdgeInsets.all(22.0),
-      //   child: Image.asset(
-      //     "assets/images/cachet-logo-white.png",
-      //     height: 50,
-      //   ),
-      // )),
     );
   }
 }

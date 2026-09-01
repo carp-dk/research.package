@@ -63,9 +63,6 @@ void main() {
       RPOrderedTask survey = RPOrderedTask.fromJson(
           json.decode(surveyJson) as Map<String, dynamic>);
 
-      // Asserted against the file, not [linearSurveyTask]: the example app
-      // comments steps in and out of its demo survey. The file is also the
-      // richer artifact, still covering timer, form and question steps.
       expect(survey.identifier, 'surveyTaskID');
       expect(survey.steps.length, 9);
       expect(survey.steps.first.identifier, 'instructionID');
@@ -129,6 +126,77 @@ void main() {
       expect(smoking.steps.first.identifier,
           stepJumpNavigationExample1.steps.first.identifier);
       print(toJsonString(smoking));
+    });
+  });
+
+  group('Example gallery', () {
+    test('every task on the home page is non-empty and round-trips', () {
+      expect(exampleTasks.keys, hasLength(7));
+      exampleTasks.forEach((name, taskBuilder) {
+        final task = taskBuilder();
+        expect(task.steps, isNotEmpty, reason: '$name has no steps');
+        final taskJson = toJsonString(task);
+        expect(
+            toJsonString(RPOrderedTask.fromJson(
+                json.decode(taskJson) as Map<String, dynamic>)),
+            equals(taskJson),
+            reason: '$name does not round-trip');
+      });
+    });
+
+    test('every gallery label is translated', () {
+      final en = AssetLocalizations.flatten(json.decode(
+          File('example/assets/lang/en.json').readAsStringSync())
+          as Map<String, dynamic>);
+      expect(en.keys, containsAll(exampleTasks.keys));
+    });
+
+    test('the linear survey covers every step and answer type', () {
+      final steps = linearSurveyTask.steps;
+      expect(steps.map((step) => step.runtimeType).toSet(),
+          containsAll([
+            RPInstructionStep,
+            RPTimerStep,
+            RPFormStep,
+            RPQuestionStep,
+            RPCompletionStep,
+          ]));
+
+      // Question steps, including the ones nested in the form step.
+      final questions = [
+        ...steps.whereType<RPQuestionStep>(),
+        ...steps.whereType<RPFormStep>().expand((step) => step.questions),
+      ];
+      expect(
+          questions.map((question) => question.answerFormat.runtimeType).toSet(),
+          containsAll([
+            RPTextAnswerFormat,
+            RPChoiceAnswerFormat,
+            RPIntegerAnswerFormat,
+            RPDoubleAnswerFormat,
+            RPSliderAnswerFormat,
+            RPDateTimeAnswerFormat,
+            RPImageChoiceAnswerFormat,
+          ]));
+      expect(
+          questions
+              .map((question) => question.answerFormat)
+              .whereType<RPChoiceAnswerFormat>()
+              .map((format) => format.answerStyle)
+              .toSet(),
+          containsAll(
+              [RPChoiceAnswerStyle.SingleChoice, RPChoiceAnswerStyle.MultipleChoice]));
+      expect(
+          questions
+              .map((question) => question.answerFormat)
+              .whereType<RPDateTimeAnswerFormat>()
+              .map((format) => format.dateTimeAnswerStyle)
+              .toSet(),
+          containsAll([
+            RPDateTimeAnswerStyle.Date,
+            RPDateTimeAnswerStyle.TimeOfDay,
+            RPDateTimeAnswerStyle.DateAndTime,
+          ]));
     });
   });
 }

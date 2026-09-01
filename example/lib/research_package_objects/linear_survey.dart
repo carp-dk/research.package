@@ -242,35 +242,24 @@ RPOrderedTask get linearSurveyTask {
     footnote: "©️ 2021 Research Package",
   );
 
-  final timerStep2 = RPTimerStep(
-    identifier: 'RPTimerStepID',
-    timeout: const Duration(seconds: 5),
-    title:
-        "Please think for a moment about how your day was and note it down in the next step",
-    playSound: true,
-    autoSkip: true,
-    footnote: "©️ 2021 Research Package",
-  );
 
   final linearSurveyTask = RPOrderedTask(
     identifier: "surveyTaskID",
     steps: [
       linearInstructionStep,
-      // timerStep1,
-      // formStep,
-      // timerStep2,
-      // smokingQuestionStep,
-      // insulinStep,
+      timerStep1,
+      formStep,
+      smokingQuestionStep,
+      insulinStep,
       wakeUpStep,
       foodStep,
-      // alcoholStep,
-      // bloodGlucoseStep,
-      // imageChoiceQuestionStep,
-      // singleChoiceQuestionStep,
-      // happinessChoiceQuestionStep,
-      // weightQuestionStep,
-      // additionalInfoQuestionStep,
-      // linearCompletionStep,
+      bloodGlucoseStep,
+      imageChoiceQuestionStep,
+      singleChoiceQuestionStep,
+      happinessChoiceQuestionStep,
+      weightQuestionStep,
+      additionalInfoQuestionStep,
+      linearCompletionStep,
     ],
   );
 

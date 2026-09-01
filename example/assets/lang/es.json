@@ -84,5 +84,9 @@
   "ic.health.blood_pressure_systolic": "Presión arterial sistólica",
   "ic.health.pressure_systolic.info": "Tienes que introducir información sobre la presión arterial sistólica en la tarjeta de presión arterial sistólica",
   "ic.health.steps": "Pasos",
-  "ic.health.steps.info": "Tienes que introducir información sobre los pasos en la tarjeta de pasos"
+  "ic.health.steps.info": "Tienes que introducir información sobre los pasos en la tarjeta de pasos",
+  "branching_survey.step_jump": "Encuesta (salto de paso)",
+  "branching_survey.direct": "Encuesta (navegación directa)",
+  "branching_survey.reorganizer": "Encuesta (reorganización de pasos)",
+  "branching_survey.emotional_distress": "Encuesta (malestar emocional)"
 }

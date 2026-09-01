@@ -92,5 +92,9 @@
   "ic.health.pressure_systolic.info": "Du skal indtaste nogle oplysninger om systolisk blodtryk i systolisk blodtryk kortet",
   "ic.health.steps": "Skridt",
   "ic.health.steps.info": "Du skal indtaste nogle oplysninger om skridt i skridt kortet",
-  "": ""
+  "": "",
+  "branching_survey.step_jump": "Spørgeskema (spring)",
+  "branching_survey.direct": "Spørgeskema (direkte navigation)",
+  "branching_survey.reorganizer": "Spørgeskema (omorganisering)",
+  "branching_survey.emotional_distress": "Spørgeskema (følelsesmæssig belastning)"
 }
