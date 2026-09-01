@@ -37,6 +37,7 @@ part 'src/loggers/activity_event_logger.dart';
 part 'src/ui/questions/choice_question_body.dart';
 part 'src/ui/questions/date_time_question_body.dart';
 part 'src/ui/questions/image_choice_question_body.dart';
+part 'src/ui/questions/star_choice_question_body.dart';
 part 'src/ui/questions/integer_question_body.dart';
 part 'src/ui/questions/double_question_body.dart';
 part 'src/ui/questions/slider_question_body.dart';
