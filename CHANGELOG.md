@@ -8,6 +8,13 @@
   `task.steps.first`, and the task ends when the task says there is no next
   step rather than when the current step is last in the list. Both stranded
   tasks whose navigation rules route to the first or past the last step.
+* The confirmation shown when leaving a task now names what is being left and
+  what leaving costs - "Leave survey?" / "Your answers will not be saved." over
+  "Discard results and quit?" - and its destructive action reads `LEAVE` rather
+  than `YES`, which answers a question the participant may not have read. A
+  consent task says it has no consent yet instead of naming answers it never
+  had. Translated in all seven supported languages.
+  * The dialog can now be dismissed by tapping outside it, which keeps the task.
 * Styling now follows the ambient Material theme: the cancel dialog, `BACK`,
   `DONE` and the choice/text/slider/integer bodies take their colours and text
   styles from `ThemeData` instead of colouring themselves.

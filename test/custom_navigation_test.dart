@@ -148,10 +148,10 @@ void main() {
     await tester.tap(find.text('my cancel'));
     await tester.pumpAndSettle();
     // The same confirmation the default close button shows.
-    expect(find.text('Discard results and quit?'), findsOneWidget);
+    expect(find.text('Leave survey?'), findsOneWidget);
     expect(cancelled, isFalse);
 
-    await tester.tap(find.text('YES'));
+    await tester.tap(find.text('LEAVE'));
     await tester.pumpAndSettle();
 
     expect(cancelled, isTrue);

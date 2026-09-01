@@ -336,22 +336,30 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
   }
 
   void showCancelConfirmationDialog() {
+    // A consent form has no answers to lose, so it says what is actually at
+    // stake: leaving without having consented.
+    final key =
+        widget.task.isConsentTask ? 'cancel_confirmation' : 'discard_confirmation';
+
     showDialog<dynamic>(
       context: context,
-      barrierDismissible: false,
+      // Tapping outside keeps the task, which is the safe outcome.
       builder: (BuildContext context) {
+        final locale = RPLocalizations.of(context);
         return AlertDialog(
-          title: Text(widget.task.isConsentTask
-              ? RPLocalizations.of(context)?.translate('cancel_confirmation') ??
-                  "Cancel?"
-              : RPLocalizations.of(context)
-                      ?.translate('discard_confirmation') ??
-                  "Discard results and quit?"),
+          title: Text(locale?.translate(key) ??
+              (widget.task.isConsentTask
+                  ? "Leave consent form?"
+                  : "Leave survey?")),
+          content: Text(locale?.translate('${key}_body') ??
+              (widget.task.isConsentTask
+                  ? "You have not given your consent yet."
+                  : "Your answers will not be saved.")),
           actions: <Widget>[
             OutlinedButton(
               onPressed: () =>
                   Navigator.of(context).pop(), // Dismissing the pop-up
-              child: Text(RPLocalizations.of(context)?.translate('NO') ?? "NO"),
+              child: Text(locale?.translate('CANCEL') ?? "CANCEL"),
             ),
             FilledButton(
               onPressed: () {
@@ -367,7 +375,7 @@ class RPUITaskState extends State<RPUITask> with CanSaveResult {
                   Navigator.of(context).pop();
                 }
               },
-              child: Text(RPLocalizations.of(context)?.translate('YES') ?? "YES"),
+              child: Text(locale?.translate('LEAVE') ?? "LEAVE"),
             ),
           ],
         );
