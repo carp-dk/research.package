@@ -14,20 +14,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  carp_themes_package: ^0.2.0
+  carp_themes_package: ^0.2.1  # 0.2.1 fixes the black dividers and dialog title
   research_package:
     path: ../
-
-# `dependency_overrides` only apply from the root package, so the example needs
-# its own copy to build against a local package. Uncomment while developing
-# against an unreleased change - see the note in ../pubspec.yaml.
-# TODO: remove once carp_themes_package 0.2.1 is published - the black
-# divider/dialog fix this package needs is only in the local copy until then.
-dependency_overrides:
-  carp_themes_package:
-    path: ../../carp_themes_package/
-#   carp_serializable:
-#     path: ../../carp/carp.sensing-flutter/carp_serializable/
 
 dev_dependencies:
   integration_test:
