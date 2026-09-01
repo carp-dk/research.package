@@ -47,6 +47,24 @@ class RPPermissions {
         if (foreground != RPPermissionStatus.granted) return foreground;
       }
 
+      // Android 12 replaced the Bluetooth permission - which is granted
+      // without asking - with the "Nearby devices" pair. Asking for both in
+      // one call shows a single dialog.
+      if (type == RPPermissionType.bluetooth &&
+          defaultTargetPlatform == TargetPlatform.android) {
+        final statuses = await [
+          ph.Permission.bluetoothScan,
+          ph.Permission.bluetoothConnect,
+        ].request();
+
+        return statuses.values
+            .map(_statusOf)
+            .firstWhere(
+              (status) => status != RPPermissionStatus.granted,
+              orElse: () => RPPermissionStatus.granted,
+            );
+      }
+
       return _statusOf(await _permissionOf(type).request());
     } catch (error) {
       debugPrint('$RPPermissions - error requesting $type - error: $error');
