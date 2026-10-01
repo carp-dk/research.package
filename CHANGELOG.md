@@ -1,3 +1,7 @@
+## Unreleased
+
+* New CARP logo in the task carousel bar and the example app
+
 ## 3.2.0
 
 * Fix: an `RPStepReorganizerRule` no longer removes the step it was triggered
