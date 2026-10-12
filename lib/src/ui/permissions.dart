@@ -82,6 +82,11 @@ class RPPermissions {
   /// Nothing is requested when access to all of [types] has already been given,
   /// because `requestAuthorization` can block in that case.
   ///
+  /// Health data on Android is read through Google Health Connect, which is a
+  /// separate app below Android 14. When it is not installed there is nothing
+  /// to ask through and this resolves to [RPPermissionStatus.unsupported] —
+  /// see [installHealthConnect].
+  ///
   /// **On iOS the returned status is optimistic.** HealthKit does not disclose
   /// whether read access was granted — for privacy, an app cannot tell the
   /// difference between "no permission" and "no data" — so
@@ -95,6 +100,19 @@ class RPPermissions {
 
     try {
       final health = Health();
+
+      // Below Android 14 Health Connect is a separate app, which can be
+      // missing. Always available on iOS. Checked before asking, because the
+      // health plugin throws when it is missing and that would be reported as
+      // the far less telling [RPPermissionStatus.unknown].
+      if (!await health.isHealthConnectAvailable()) {
+        debugPrint(
+            '$RPPermissions - Google Health Connect is not available on this '
+            'device, so health data cannot be requested. Send the participant '
+            'to install it with installHealthConnect().');
+        return RPPermissionStatus.unsupported;
+      }
+
       // Null on iOS - undetermined, not denied.
       if (await health.hasPermissions(types) ?? false) {
         return RPPermissionStatus.granted;
@@ -108,6 +126,13 @@ class RPPermissions {
       return RPPermissionStatus.unknown;
     }
   }
+
+  /// Sends the participant to the store to install Google Health Connect.
+  ///
+  /// Android only — does nothing on iOS. Use when [requestHealthData] resolved
+  /// to [RPPermissionStatus.unsupported] because Health Connect is missing.
+  static Future<void> installHealthConnect() async =>
+      await Health().installHealthConnect();
 
   /// The platform permission to ask for to obtain [type].
   ///

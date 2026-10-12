@@ -155,6 +155,11 @@ the authorisation sheet was shown without error, not that the participant agreed
 Connect reports the real outcome. `RPPermissions.requestHealthData()` is public if an app needs to
 ask outside a consent flow.
 
+**On Android, health data is read through Google Health Connect**, which is part of the OS from
+Android 14 but a separate app below it. When it is not installed there is nothing to ask through and
+the permission resolves to `unsupported`. Send the participant to install it with
+`RPPermissions.installHealthConnect()`.
+
 ### Platform setup
 
 Only needed by apps which use `askPermission`.
@@ -208,12 +213,22 @@ The `health` plugin is a dependency of `research_package`, so its platform requi
   activity, and the `ViewPermissionUsageActivity` alias. `MainActivity` must extend
   `FlutterFragmentActivity` rather than `FlutterActivity`, or Health Connect cannot show its
   permission sheet on Android 14 and later.
-* **iOS** — `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` in `Info.plist`,
-  plus the **HealthKit** capability on the Runner target, added under "Signing & Capabilities" in
-  Xcode. Without the capability the authorisation sheet never appears.
+* **iOS** — an `IPHONEOS_DEPLOYMENT_TARGET` of **15.0** or higher, plus
+  `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` in `Info.plist` and the
+  **HealthKit** capability on the Runner target, added under "Signing & Capabilities" in Xcode.
+  Without the capability the authorisation sheet never appears.
+
+  Raising the deployment target is not enough on its own when the project uses Swift Package
+  Manager. `FlutterGeneratedPluginSwiftPackage` is regenerated with Flutter's own minimum of iOS
+  13.0 whenever the plugin list is refreshed — which `flutter pub get` does — and is only raised to
+  match the project's target by `flutter build` and `flutter run`. Those two therefore always work.
+  Building straight from Xcode after a `flutter pub get` fails with *"The package product 'health'
+  requires minimum platform version 15.0 for the iOS platform, but this target supports 13.0"*;
+  `flutter build ios --config-only` repairs it. Build through Flutter rather than Xcode's own Run
+  button to avoid it entirely.
 
 `example/` is set up this way and can be copied from — see its `AndroidManifest.xml`,
-`MainActivity.kt`, `build.gradle.kts` and `Info.plist`.
+`MainActivity.kt`, `build.gradle.kts`, `Info.plist` and `Runner.entitlements`.
 
 ## Example Application
 

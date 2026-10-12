@@ -1,3 +1,19 @@
+## 3.3.0
+
+* Fix: requesting `RPPermissionType.health` on Android no longer fails silently
+  when Google Health Connect - a separate app below Android 14 - is not
+  installed. The health plugin throws in that case, which was caught and
+  reported as the untelling `unknown`; it now resolves to `unsupported`, says
+  so in the log, and `RPPermissions.installHealthConnect()` sends the
+  participant to install it.
+* Fix: the example app was missing the **HealthKit** capability on its iOS
+  Runner target, so the authorisation sheet never appeared during informed
+  consent however the consent document was set up.
+* The iOS deployment target `health` requires - 15.0 - is now documented, along
+  with the Swift Package Manager caveat that `flutter pub get` regenerates
+  `FlutterGeneratedPluginSwiftPackage` at Flutter's own iOS 13.0 minimum, which
+  only `flutter build` and `flutter run` raise to match the project.
+
 ## 3.2.0
 
 * Fix: an `RPStepReorganizerRule` no longer removes the step it was triggered

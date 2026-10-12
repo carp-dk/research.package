@@ -64,9 +64,12 @@ enum RPPermissionStatus {
   /// The OS does not allow this permission, e.g. due to parental controls.
   restricted,
 
-  /// The permission does not exist on this platform, or it is
+  /// The permission cannot be asked for on this device.
+  ///
+  /// Either it does not exist on this platform, or it is
   /// [RPPermissionType.health] and the section listed no
-  /// [RPConsentSection.healthDataTypes] to ask for.
+  /// [RPConsentSection.healthDataTypes] to ask for, or Google Health Connect —
+  /// which health data on Android is read through — is not installed.
   unsupported,
 
   /// The status could not be determined, e.g. because no platform
