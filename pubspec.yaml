@@ -36,11 +36,6 @@ dev_dependencies:
   # Needed by test/example_json_test.dart, which imports the example app.
   flutter_localizations:
     sdk: flutter
-  # Needed by the example app, which sets RPPermissions.requester. Dev
-  # dependencies only, so apps using research_package do not link them - in
-  # particular not HealthKit.
-  permission_handler: '>=12.0.0 <13.0.0'
-  health: '>=13.0.0 <14.0.0'
   build_runner: any
   json_serializable: any
   flutter_lints: any
