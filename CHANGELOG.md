@@ -1,11 +1,28 @@
-## 3.3.0
+## 4.0.0
 
-* Fix: requesting `RPPermissionType.health` on Android no longer fails silently
-  when Google Health Connect - a separate app below Android 14 - is not
-  installed. The health plugin throws in that case, which was caught and
-  reported as the untelling `unknown`; it now resolves to `unsupported`, says
-  so in the log, and `RPPermissions.installHealthConnect()` sends the
-  participant to install it.
+* **Breaking:** `research_package` no longer depends on the `health` or
+  `permission_handler` plugins, and no longer asks for permissions itself.
+  `health` linked Apple HealthKit into every app using Research Package, and
+  App Store review rejects an app which links HealthKit without using it - so
+  apps which never asked for health data were rejected. It also forced
+  `minSdkVersion 26` on every Android app.
+  * An app which sets `askPermission` now passes a requester, which does the
+    asking, to `ResearchPackage.ensureInitialized(permissionRequester: ...)`
+    - see "Asking for permissions" in the README. Until
+    it does, every permission resolves to `unsupported`. The example app's
+    `example/lib/permissions.dart` is a complete requester which can be
+    copied; it holds the platform handling Research Package used to do
+    (location before background location, the Android Bluetooth pair, ...).
+  * `RPConsentSection.healthDataTypes` is now a `List<String>` of
+    `HealthDataType` names, e.g. `HealthDataType.STEPS.name`. The JSON is
+    unchanged, so existing consent documents load as before.
+  * `HealthDataType` is no longer re-exported, and
+    `RPPermissions.requestHealthData()` is removed - use
+    `RPPermissions.request(RPPermissionType.health, healthDataTypes: ...)`.
+* The example app shows how to handle Google Health Connect - a separate app
+  below Android 14 - being missing: the health plugin throws when asked
+  without it, so the requester checks first, sends the participant to install
+  it, and resolves to `unsupported`.
 * Fix: the example app was missing the **HealthKit** capability on its iOS
   Runner target, so the authorisation sheet never appeared during informed
   consent however the consent document was set up.

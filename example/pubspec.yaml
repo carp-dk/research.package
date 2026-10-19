@@ -15,6 +15,8 @@ dependencies:
     sdk: flutter
 
   carp_themes_package: ^0.2.1
+  health: '>=13.0.0 <14.0.0'
+  permission_handler: '>=12.0.0 <13.0.0'
   research_package:
     path: ../
 

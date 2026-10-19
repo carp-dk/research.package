@@ -13,7 +13,7 @@ enum RPPermissionType {
   /// Access to the device location also while the app is in the background.
   ///
   /// Both platforms require the foreground permission to be granted first, so
-  /// requesting this asks for [location] before escalating.
+  /// [RPPermissions.requester] should ask for [location] before escalating.
   locationAlways,
 
   /// Access to the microphone, e.g. for audio recordings or noise sampling.
@@ -46,6 +46,12 @@ enum RPPermissionType {
   /// list the types it needs in [RPConsentSection.healthDataTypes]. Without
   /// them there is nothing to ask for and this resolves to
   /// [RPPermissionStatus.unsupported].
+  ///
+  /// **On iOS a granted status is optimistic.** HealthKit does not disclose
+  /// whether read access was granted — for privacy, an app cannot tell the
+  /// difference between "no permission" and "no data" — so
+  /// [RPPermissionStatus.granted] can only mean the authorisation sheet was
+  /// shown without error. Android Health Connect reports the real outcome.
   health,
 }
 
@@ -68,8 +74,8 @@ enum RPPermissionStatus {
   ///
   /// Either it does not exist on this platform, or it is
   /// [RPPermissionType.health] and the section listed no
-  /// [RPConsentSection.healthDataTypes] to ask for, or Google Health Connect —
-  /// which health data on Android is read through — is not installed.
+  /// [RPConsentSection.healthDataTypes] to ask for, or no
+  /// [RPPermissions.requester] has been set to ask with.
   unsupported,
 
   /// The status could not be determined, e.g. because no platform

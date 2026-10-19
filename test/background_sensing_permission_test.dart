@@ -7,11 +7,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:research_package/research_package.dart';
 
+// ignore: avoid_relative_lib_imports
+import '../example/lib/main.dart' show requestPermission;
+
 /// Verifies [RPPermissionType.ignoreBatteryOptimizations] - the exemption which
 /// lets a study keep sampling while the app is in the background.
 ///
 /// It is the odd one out: Android opens a settings page rather than a dialog,
 /// and iOS has no equivalent at all.
+///
+/// Research Package leaves the asking to the app, so this verifies the
+/// requester of the example app, which apps copy.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -65,7 +71,7 @@ void main() {
   late int requestOutcome;
 
   setUp(() {
-    ResearchPackage.ensureInitialized();
+    ResearchPackage.ensureInitialized(permissionRequester: requestPermission);
     requested = [];
     sentResults = [];
     requestOutcome = granted;
@@ -86,6 +92,7 @@ void main() {
   });
 
   tearDown(() async {
+    RPPermissions.requester = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(permissionChannel, null);
     await subscription.cancel();

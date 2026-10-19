@@ -52,7 +52,10 @@ class RPConsentSection extends Serializable {
   /// [permissions] contains [RPPermissionType.health]; conversely, that
   /// permission resolves to [RPPermissionStatus.unsupported] if this is `null`
   /// or empty, since there would be nothing to ask for.
-  List<HealthDataType>? healthDataTypes;
+  ///
+  /// Each entry is the name of a `HealthDataType` from the `health` package,
+  /// e.g. `'STEPS'`, and is passed as is to [RPPermissions.requester].
+  List<String>? healthDataTypes;
 
   /// A custom illustration (an [Image] or [Icon] to show for Custom [RPConsentSectionType]
   @JsonKey(includeFromJson: false, includeToJson: false)

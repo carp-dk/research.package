@@ -100,9 +100,9 @@ RPOrderedTask get consentTask {
     summary: "ic.health.summary",
     permissions: [RPPermissionType.health],
     healthDataTypes: [
-      HealthDataType.STEPS,
-      HealthDataType.HEART_RATE,
-      HealthDataType.SLEEP_ASLEEP,
+      HealthDataType.STEPS.name,
+      HealthDataType.HEART_RATE.name,
+      HealthDataType.SLEEP_ASLEEP.name,
     ],
     dataTypes: [
       RPDataTypeSection(

@@ -27,8 +27,7 @@ class RPVisualConsentStep extends RPStep {
   ///
   /// Note that the host app is responsible for declaring the permissions it
   /// asks for in `Info.plist` (iOS) and `AndroidManifest.xml` (Android), and
-  /// that [RPPermissionType.health] additionally needs a
-  /// [RPPermissions.healthHandler].
+  /// for setting [RPPermissions.requester], which does the asking.
   bool askPermission;
 
   RPVisualConsentStep({

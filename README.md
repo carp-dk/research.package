@@ -112,6 +112,42 @@ The outcome of every request is collected in an `RPPermissionResult` added to th
 under the identifier of the visual consent step. A denied permission is recorded but never blocks the
 participant.
 
+### Asking for permissions
+
+**Research Package does not talk to the platform about permissions itself** — the app does, by
+passing a requester to `ResearchPackage.ensureInitialized`. A dependency on a native plugin would be forced on every app
+using this package: the [health](https://pub.dev/packages/health) plugin, for instance, links
+HealthKit, and App Store review rejects an app which links HealthKit without using it. Until a
+requester is set, every permission resolves to `RPPermissionStatus.unsupported`.
+
+```dart
+void main() {
+  ResearchPackage.ensureInitialized(
+    permissionRequester: (type, {healthDataTypes = const []}) async {
+      switch (type) {
+        case RPPermissionType.health:
+          return requestHealthData(healthDataTypes);
+        case RPPermissionType.camera:
+          return statusOf(await Permission.camera.request());
+        // ...
+      }
+    },
+  );
+
+  runApp(const MyApp());
+}
+```
+
+The example app has a complete requester, built on
+[permission_handler](https://pub.dev/packages/permission_handler) and `health`, which can be copied
+as is — see [`example/lib/permissions.dart`](example/lib/permissions.dart). It also handles the cases
+which are not one-to-one: background location asks for foreground location first, Bluetooth on
+Android asks for the "Nearby devices" pair, battery optimization is `unsupported` on iOS, and
+activity recognition comes from the motion sensors on iOS.
+
+An exception thrown by the requester is caught and recorded as `unknown`, so it never interrupts the
+consent flow.
+
 ### Navigation in a consent flow
 
 Apple requires that a screen explaining an upcoming permission request carries a single button,
@@ -141,28 +177,24 @@ RPConsentSection(
   type: RPConsentSectionType.Health,
   summary: 'We read your steps and sleep to see how your activity changes.',
   permissions: [RPPermissionType.health],
-  healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+  healthDataTypes: [HealthDataType.STEPS.name, HealthDataType.SLEEP_ASLEEP.name],
 );
 ```
 
-`HealthDataType` comes from the [health](https://pub.dev/packages/health) package and is re-exported
-by `research_package`, so it needs no separate import. Read access is requested for every type
-listed; types the participant has already authorised are skipped.
+Each entry of `healthDataTypes` is the name of a `HealthDataType` of the `health` plugin, and is
+passed as is to the requester. The example's `requestHealthData()` reads them with
+`HealthDataType.values.byName`, and also handles Google Health Connect — a separate app below
+Android 14 — being missing, which the plugin throws on.
 
 **On iOS the recorded status is optimistic.** HealthKit deliberately does not disclose whether read
 access was granted — an app cannot tell "not permitted" from "no data" — so `granted` there means
 the authorisation sheet was shown without error, not that the participant agreed. Android Health
-Connect reports the real outcome. `RPPermissions.requestHealthData()` is public if an app needs to
-ask outside a consent flow.
-
-**On Android, health data is read through Google Health Connect**, which is part of the OS from
-Android 14 but a separate app below it. When it is not installed there is nothing to ask through and
-the permission resolves to `unsupported`. Send the participant to install it with
-`RPPermissions.installHealthConnect()`.
+Connect reports the real outcome.
 
 ### Platform setup
 
-Only needed by apps which use `askPermission`.
+Only needed by apps which use `askPermission`, and written for a requester built on
+`permission_handler` and `health` like the example's.
 
 **Android** — declare each permission in `android/app/src/main/AndroidManifest.xml`. An undeclared
 permission is reported as permanently denied without showing a dialog.
@@ -203,11 +235,9 @@ With **Swift Package Manager** this step is not needed — the macros are derive
 
 #### Health data
 
-The `health` plugin is a dependency of `research_package`, so its platform requirements apply to
-**every** app using this package, whether or not it asks for health data:
+Only needed by apps which ask for health data, and so depend on the `health` plugin:
 
-* **Android** — `minSdkVersion 26`. Apps which ask for health data additionally need, in
-  `AndroidManifest.xml`, a `<uses-permission android:name="android.permission.health.READ_*"/>` per
+* **Android** — `minSdkVersion 26`, and, in `AndroidManifest.xml`, a `<uses-permission android:name="android.permission.health.READ_*"/>` per
   data type, a `<package android:name="com.google.android.apps.healthdata"/>` entry under
   `<queries>`, an `androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` intent filter on the main
   activity, and the `ViewPermissionUsageActivity` alias. `MainActivity` must extend

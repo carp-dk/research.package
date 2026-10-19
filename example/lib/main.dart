@@ -5,7 +5,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:research_package/research_package.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_themes_package/carp_themes_package.dart';
+import 'package:flutter/foundation.dart';
+import 'package:health/health.dart';
+// Prefixed, to keep `Permission`, `PermissionStatus` and the rest apart from
+// the RPPermission names.
+import 'package:permission_handler/permission_handler.dart' as ph;
 
+part 'permissions.dart';
 part 'task_page.dart';
 part 'research_package_objects/informed_consent.dart';
 part 'research_package_objects/linear_survey.dart';
@@ -17,7 +23,11 @@ part 'research_package_objects/other_navigable_survey_examples.dart';
 void main() {
   // initialize research package
   // mostly used if you load a RP configurations from a json file
-  ResearchPackage.ensureInitialized();
+  //
+  // Research Package does not ask for permissions itself, so that apps which
+  // do not need them do not link the native plugins - HealthKit in particular.
+  // This app does, so it asks.
+  ResearchPackage.ensureInitialized(permissionRequester: requestPermission);
 
   runApp(const RPDemoApp());
 }
