@@ -19,6 +19,8 @@ void registerFromJsonFunctions() {
     RPFormAnswerFormat(),
     RPImageChoiceAnswerFormat(choices: []),
     RPImageChoice(description: '', imageUrl: ''),
+    RPStarChoiceAnswerFormat(choices: []),
+    RPStarChoice(starActiveUrl: '', starNotActiveUrl: '', description: ''),
     RPIntegerAnswerFormat(maxValue: 1, minValue: 1),
     RPDoubleAnswerFormat(maxValue: 1, minValue: 1),
     RPSliderAnswerFormat(divisions: 1, maxValue: 1, minValue: 1),

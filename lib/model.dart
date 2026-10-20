@@ -26,6 +26,7 @@ part 'src/model/answerformat/choice_answer_format.dart';
 part 'src/model/answerformat/form_answer_format.dart';
 part 'src/model/answerformat/slider_answer_format.dart';
 part 'src/model/answerformat/image_choice_answer_format.dart';
+part 'src/model/answerformat/star_choice_answer_format.dart';
 part 'src/model/answerformat/date_time_answer_format.dart';
 part 'src/model/answerformat/text_answer_format.dart';
 

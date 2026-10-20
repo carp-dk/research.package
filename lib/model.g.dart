@@ -214,6 +214,46 @@ Map<String, dynamic> _$RPImageChoiceToJson(RPImageChoice instance) =>
       'description': instance.description,
     };
 
+RPStarChoiceAnswerFormat _$RPStarChoiceAnswerFormatFromJson(
+    Map<String, dynamic> json) =>
+    RPStarChoiceAnswerFormat(
+      choices: (json['choices'] as List<dynamic>)
+          .map((e) => RPStarChoice.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    )
+      ..$type = json['__type'] as String?
+      ..questionType =
+      $enumDecode(_$RPQuestionTypeEnumMap, json['questionType']);
+
+Map<String, dynamic> _$RPStarChoiceAnswerFormatToJson(
+    RPStarChoiceAnswerFormat instance) =>
+    <String, dynamic>{
+      if (instance.$type case final value?) '__type': value,
+      'choices': instance.choices.map((e) => e.toJson()).toList(),
+      'questionType': _$RPQuestionTypeEnumMap[instance.questionType]!,
+    };
+
+RPStarChoice _$RPStarChoiceFromJson(Map<String, dynamic> json) =>
+    RPStarChoice(
+      starActiveUrl: json['starActiveUrl'] as String,
+      starNotActiveUrl: json['starNotActiveUrl'] as String,
+      keyActive: json['keyActive'] as String?,
+      keyNotActive: json['keyNotActive'] as String?,
+      value: json['value'],
+      description: json['description'] as String,
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$RPStarChoiceToJson(RPStarChoice instance) =>
+    <String, dynamic>{
+      if (instance.$type case final value?) '__type': value,
+      'starActiveUrl': instance.starActiveUrl,
+      'starNotActiveUrl': instance.starNotActiveUrl,
+      if (instance.keyActive case final value?) 'keyActive': value,
+      if (instance.keyNotActive case final value?) 'keyNotActive': value,
+      if (instance.value case final value?) 'value': value,
+      'description': instance.description,
+    };
+
 RPDateTimeAnswerFormat _$RPDateTimeAnswerFormatFromJson(
   Map<String, dynamic> json,
 ) =>
