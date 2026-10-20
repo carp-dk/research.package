@@ -137,20 +137,19 @@ void main() {
     });
 
     test('RPConsentSection with health data types survives a round trip', () {
-      // Serialized through a generated enum map of the health package's 100+
-      // types, so a regeneration missing them would silently drop them.
+      // The names of the health package's HealthDataType values, kept as
+      // strings so research_package does not depend on that package.
       final section = RPConsentSection(
         type: RPConsentSectionType.Health,
         summary: 'Why we read your health data',
         permissions: [RPPermissionType.health],
-        healthDataTypes: [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP],
+        healthDataTypes: ['STEPS', 'SLEEP_ASLEEP'],
       );
 
       final restored = RPConsentSection.fromJson(
           json.decode(toJsonString(section)) as Map<String, dynamic>);
 
-      expect(restored.healthDataTypes,
-          [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP]);
+      expect(restored.healthDataTypes, ['STEPS', 'SLEEP_ASLEEP']);
       expect(restored.permissions, [RPPermissionType.health]);
     });
 

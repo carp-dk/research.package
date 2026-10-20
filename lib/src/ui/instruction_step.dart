@@ -102,12 +102,20 @@ class RPUIInstructionStepState extends State<RPUIInstructionStep> {
                                 style:
                                     Theme.of(context).textTheme.headlineSmall,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                locale?.translate(widget.step.text!) ??
-                                    widget.step.text!,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
+                              // `text` is nullable on RPStep and a
+                              // server-defined step with only a title is
+                              // ordinary, so this is guarded like detailText
+                              // and footnote below. Unwrapped, it threw during
+                              // build and the whole step rendered as Flutter's
+                              // red error box.
+                              if (widget.step.text != null) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  locale?.translate(widget.step.text!) ??
+                                      widget.step.text!,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ],
                             ],
                           ),
                         ),

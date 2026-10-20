@@ -3,8 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:research_package/research_package.dart';
 
+// ignore: avoid_relative_lib_imports
+import '../example/lib/main.dart' show requestPermission;
+
 /// Verifies that asking for [RPPermissionType.bluetooth] on Android requests
 /// the "Nearby devices" permissions, and the adapter permission elsewhere.
+///
+/// Research Package leaves the asking to the app, so this verifies the
+/// requester of the example app, which apps copy.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -39,9 +45,11 @@ void main() {
   setUp(() {
     requested = [];
     fakePermissions(granted);
+    ResearchPackage.ensureInitialized(permissionRequester: requestPermission);
   });
 
   tearDown(() {
+    RPPermissions.requester = null;
     debugDefaultTargetPlatformOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);

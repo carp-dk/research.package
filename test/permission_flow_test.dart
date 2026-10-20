@@ -10,18 +10,14 @@ import 'package:research_package/research_package.dart';
 /// Verifies that the permissions declared on a consent section are asked for
 /// when leaving it, and only when the step opted in with `askPermission`.
 ///
-/// [RPPermissionType.health] is used throughout because its single method
-/// channel can be faked, so the real request path runs.
+/// [RPPermissionType.health] is used throughout, asked for through a fake
+/// [RPPermissions.requester], since the requester is the app's.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  /// The channel of the `health` plugin, faked below.
-  const healthChannel = MethodChannel('flutter_health');
-
   /// The health data types this study reads - two, because health is not one
   /// permission.
-  const healthTypes = [HealthDataType.STEPS, HealthDataType.SLEEP_ASLEEP];
-  const healthTypeNames = ['STEPS', 'SLEEP_ASLEEP'];
+  const healthTypes = ['STEPS', 'SLEEP_ASLEEP'];
 
   /// A document whose first section asks for health data and whose second asks
   /// for nothing.
@@ -84,42 +80,30 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// The health data types passed to `requestAuthorization`, one entry per call.
+  /// The health data types passed to the requester, one entry per call.
   late List<List<String>> requested;
   late List<RPResult> sentResults;
   late StreamSubscription<RPResult> subscription;
 
-  /// What the faked plugin answers. A null `hasPermissions` is the iOS
-  /// behaviour - HealthKit does not disclose read access.
-  late bool? alreadyGranted;
-  late bool authorizationSucceeds;
+  /// What the faked requester answers.
+  late RPPermissionStatus answer;
 
   setUp(() {
-    ResearchPackage.ensureInitialized();
     requested = [];
     sentResults = [];
-    alreadyGranted = null;
-    authorizationSucceeds = true;
+    answer = RPPermissionStatus.granted;
     subscription = blocTask.stepResult.listen(sentResults.add);
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(healthChannel, (call) async {
-          final types = ((call.arguments as Map)['types'] as List)
-              .cast<String>();
-          switch (call.method) {
-            case 'hasPermissions':
-              return alreadyGranted;
-            case 'requestAuthorization':
-              requested.add(types);
-              return authorizationSucceeds;
-          }
-          return null;
-        });
+    ResearchPackage.ensureInitialized(
+      permissionRequester: (type, {healthDataTypes = const []}) async {
+        requested.add(healthDataTypes);
+        return answer;
+      },
+    );
   });
 
   tearDown(() async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(healthChannel, null);
+    RPPermissions.requester = null;
     await subscription.cancel();
   });
 
@@ -140,7 +124,7 @@ void main() {
       expect(requested, isEmpty);
 
       await tapForward(tester, 'NEXT');
-      expect(requested, [healthTypeNames]);
+      expect(requested, [healthTypes]);
     },
   );
 
@@ -195,7 +179,7 @@ void main() {
     await tapForward(tester, 'NEXT');
     await tapForward(tester, 'SEE SUMMARY');
 
-    expect(requested, [healthTypeNames]);
+    expect(requested, [healthTypes]);
   });
 
   testWidgets('without askPermission nothing is requested or recorded', (
@@ -219,7 +203,7 @@ void main() {
   });
 
   /// Health is not a single permission, so the section says which types it
-  /// needs and those are what reaches the plugin.
+  /// needs and those are what reaches the app's requester.
   group('health data types', () {
     Future<RPPermissionResult> runStep(
       WidgetTester tester,
@@ -243,9 +227,7 @@ void main() {
       tester,
     ) async {
       final document = documentWithHealthOnFirstSection();
-      document.sections.first.healthDataTypes = const [
-        HealthDataType.HEART_RATE,
-      ];
+      document.sections.first.healthDataTypes = const ['HEART_RATE'];
 
       await runStep(tester, document);
 
@@ -270,28 +252,43 @@ void main() {
       });
     });
 
-    testWidgets('data already authorised is not asked for again', (
+    testWidgets('without a requester health resolves to unsupported', (
       tester,
     ) async {
-      // requestAuthorization can block when access was already granted.
-      alreadyGranted = true;
+      // An app which does not depend on the health package - so that it does
+      // not link HealthKit - has nothing to ask with. The flow must go on.
+      RPPermissions.requester = null;
 
       final result = await runStep(tester, documentWithHealthOnFirstSection());
 
-      expect(requested, isEmpty);
       expect(result.statuses, {
-        RPPermissionType.health: RPPermissionStatus.granted,
+        RPPermissionType.health: RPPermissionStatus.unsupported,
+      });
+    });
+
+    testWidgets('a requester which throws resolves to unknown', (
+      tester,
+    ) async {
+      // The requester is app code, and a failing plugin call in it may not
+      // interrupt the consent flow.
+      RPPermissions.requester = (_, {healthDataTypes = const []}) async =>
+          throw Exception('Health Connect is not installed');
+
+      final result = await runStep(tester, documentWithHealthOnFirstSection());
+
+      expect(result.statuses, {
+        RPPermissionType.health: RPPermissionStatus.unknown,
       });
     });
 
     testWidgets('a refused authorisation is recorded as denied', (
       tester,
     ) async {
-      authorizationSucceeds = false;
+      answer = RPPermissionStatus.denied;
 
       final result = await runStep(tester, documentWithHealthOnFirstSection());
 
-      expect(requested, [healthTypeNames]);
+      expect(requested, [healthTypes]);
       // Recorded, not blocking - the participant still reaches the end.
       expect(result.statuses, {
         RPPermissionType.health: RPPermissionStatus.denied,
@@ -338,7 +335,7 @@ void main() {
       // Onto the health section, then past it - which is what shows the alert.
       await tapForward(tester, 'NEXT');
       await tapForward(tester, 'NEXT');
-      expect(requested, [healthTypeNames]);
+      expect(requested, [healthTypes]);
 
       // No longer about to open an alert, so it behaves normally again.
       await tapForward(tester, 'BACK');
